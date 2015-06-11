@@ -9,4 +9,4 @@ Instructions for working on code:
 5. Re-pull from the remote master branch to your local master branch.
 6. Merge your new local master branch to your local editing branch.
 7. Push your local editing branch to the repository.
-8. Create a pull requestfor your new code to be reviewed.
+8. Create a pull request for your new code to be reviewed.
