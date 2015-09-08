@@ -19,3 +19,4 @@ Instructions for working on code:
 |  Python 2.7 (32 bit)  |       https://www.python.org/downloads/        |
 |        PyCharm        |   https://www.jetbrains.com/pycharm/download/  |
 | PyGame 1.9.1 (32 bit) |      http://www.pygame.org/download.shtml      |
+|          git          |           https://git-scm.com/downloads        |
