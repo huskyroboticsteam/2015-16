@@ -2,17 +2,17 @@
 // Created by Tim Eckel - teckel@leethost.com
 // Copyright 2012 License: GNU GPL v3 http://www.gnu.org/licenses/gpl-3.0.html
 //
-// See "NewPing.h" for purpose, syntax, version history, links, and more.
+// See "Ultrasonic.h" for purpose, syntax, version history, links, and more.
 // ---------------------------------------------------------------------------
 
-#include "NewPing.h"
+#include "Ultrasonic.h"
 
 
 // ---------------------------------------------------------------------------
-// NewPing constructor
+// Ultrasonic constructor
 // ---------------------------------------------------------------------------
 
-NewPing::NewPing(uint8_t trigger_pin, uint8_t echo_pin, int max_cm_distance) {
+Ultrasonic::Ultrasonic(uint8_t trigger_pin, uint8_t echo_pin, int max_cm_distance) {
 	_triggerBit = digitalPinToBitMask(trigger_pin); // Get the port register bitmask for the trigger pin.
 	_echoBit = digitalPinToBitMask(echo_pin);       // Get the port register bitmask for the echo pin.
 
@@ -33,7 +33,7 @@ NewPing::NewPing(uint8_t trigger_pin, uint8_t echo_pin, int max_cm_distance) {
 // Standard ping methods
 // ---------------------------------------------------------------------------
 
-unsigned int NewPing::ping() {
+unsigned int Ultrasonic::ping() {
 	if (!ping_trigger()) return NO_ECHO;                // Trigger a ping, if it returns false, return NO_ECHO to the calling function.
 	while (*_echoInput & _echoBit)                      // Wait for the ping echo.
 		if (micros() > _max_time) return NO_ECHO;       // Stop the loop and return NO_ECHO (false) if we're beyond the set maximum distance.
@@ -41,19 +41,19 @@ unsigned int NewPing::ping() {
 }
 
 
-unsigned int NewPing::ping_in() {
-	unsigned int echoTime = NewPing::ping();          // Calls the ping method and returns with the ping echo distance in uS.
-	return NewPingConvert(echoTime, US_ROUNDTRIP_IN); // Convert uS to inches.
+unsigned int Ultrasonic::ping_in() {
+	unsigned int echoTime = Ultrasonic::ping();          // Calls the ping method and returns with the ping echo distance in uS.
+	return UltrasonicConvert(echoTime, US_ROUNDTRIP_IN); // Convert uS to inches.
 }
 
 
-unsigned int NewPing::ping_cm() {
-	unsigned int echoTime = NewPing::ping();          // Calls the ping method and returns with the ping echo distance in uS.
-	return NewPingConvert(echoTime, US_ROUNDTRIP_CM); // Convert uS to centimeters.
+unsigned int Ultrasonic::ping_cm() {
+	unsigned int echoTime = Ultrasonic::ping();          // Calls the ping method and returns with the ping echo distance in uS.
+	return UltrasonicConvert(echoTime, US_ROUNDTRIP_CM); // Convert uS to centimeters.
 }
 
 
-unsigned int NewPing::ping_median(uint8_t it) {
+unsigned int Ultrasonic::ping_median(uint8_t it) {
 	unsigned int uS[it], last;
 	uint8_t j, i = 0;
 	uS[0] = NO_ECHO;
@@ -80,7 +80,7 @@ unsigned int NewPing::ping_median(uint8_t it) {
 // Standard ping method support functions (not called directly)
 // ---------------------------------------------------------------------------
 
-boolean NewPing::ping_trigger() {
+boolean Ultrasonic::ping_trigger() {
 #if DISABLE_ONE_PIN != true
 	*_triggerMode |= _triggerBit;    // Set trigger pin to output.
 #endif
@@ -107,13 +107,13 @@ boolean NewPing::ping_trigger() {
 // Timer interrupt ping methods (won't work with ATmega8 and ATmega128)
 // ---------------------------------------------------------------------------
 
-void NewPing::ping_timer(void (*userFunc)(void)) {
+void Ultrasonic::ping_timer(void (*userFunc)(void)) {
 	if (!ping_trigger()) return;         // Trigger a ping, if it returns false, return without starting the echo timer.
 	timer_us(ECHO_TIMER_FREQ, userFunc); // Set ping echo timer check every ECHO_TIMER_FREQ uS.
 }
 
  
-boolean NewPing::check_timer() {
+boolean Ultrasonic::check_timer() {
 	if (micros() > _max_time) { // Outside the timeout limit.
 		timer_stop();           // Disable timer interrupt
 		return false;           // Cancel ping timer.
@@ -140,7 +140,7 @@ unsigned long _ms_cnt_reset;
 volatile unsigned long _ms_cnt;
 
 
-void NewPing::timer_us(unsigned int frequency, void (*userFunc)(void)) {
+void Ultrasonic::timer_us(unsigned int frequency, void (*userFunc)(void)) {
 	timer_setup();      // Configure the timer interrupt.
 	intFunc = userFunc; // User's function to call when there's a timer event.
 
@@ -154,9 +154,9 @@ void NewPing::timer_us(unsigned int frequency, void (*userFunc)(void)) {
 }
 
 
-void NewPing::timer_ms(unsigned long frequency, void (*userFunc)(void)) {
+void Ultrasonic::timer_ms(unsigned long frequency, void (*userFunc)(void)) {
 	timer_setup();                       // Configure the timer interrupt.
-	intFunc = NewPing::timer_ms_cntdwn;  // Timer events are sent here once every ms till user's frequency is reached.
+	intFunc = Ultrasonic::timer_ms_cntdwn;  // Timer events are sent here once every ms till user's frequency is reached.
 	intFunc2 = userFunc;                 // User's function to call when user's frequency is reached.
 	_ms_cnt = _ms_cnt_reset = frequency; // Current ms counter and reset value.
 
@@ -170,7 +170,7 @@ void NewPing::timer_ms(unsigned long frequency, void (*userFunc)(void)) {
 }
 
 
-void NewPing::timer_stop() { // Disable timer interrupt.
+void Ultrasonic::timer_stop() { // Disable timer interrupt.
 #if defined (__AVR_ATmega32U4__) // Use Timer4 for ATmega32U4 (Teensy/Leonardo).
 	TIMSK4 = 0;
 #else
@@ -183,7 +183,7 @@ void NewPing::timer_stop() { // Disable timer interrupt.
 // Timer2/Timer4 interrupt method support functions (not called directly)
 // ---------------------------------------------------------------------------
 
-void NewPing::timer_setup() {
+void Ultrasonic::timer_setup() {
 #if defined (__AVR_ATmega32U4__) // Use Timer4 for ATmega32U4 (Teensy/Leonardo).
 	timer_stop(); // Disable Timer4 interrupt.
 	TCCR4A = TCCR4C = TCCR4D = TCCR4E = 0;
@@ -200,7 +200,7 @@ void NewPing::timer_setup() {
 }
 
 
-void NewPing::timer_ms_cntdwn() {
+void Ultrasonic::timer_ms_cntdwn() {
 	if (!_ms_cnt--) {            // Count down till we reach zero.
 		intFunc2();              // Scheduled time reached, run the main timer event function.
 		_ms_cnt = _ms_cnt_reset; // Reset the ms timer.
@@ -221,11 +221,11 @@ ISR(TIMER2_COMPA_vect) {
 // Conversion methods (rounds result to nearest inch or cm).
 // ---------------------------------------------------------------------------
 
-unsigned int NewPing::convert_in(unsigned int echoTime) {
-	return NewPingConvert(echoTime, US_ROUNDTRIP_IN); // Convert uS to inches.
+unsigned int Ultrasonic::convert_in(unsigned int echoTime) {
+	return UltrasonicConvert(echoTime, US_ROUNDTRIP_IN); // Convert uS to inches.
 }
 
 
-unsigned int NewPing::convert_cm(unsigned int echoTime) {
-	return NewPingConvert(echoTime, US_ROUNDTRIP_CM); // Convert uS to centimeters.
+unsigned int Ultrasonic::convert_cm(unsigned int echoTime) {
+	return UltrasonicConvert(echoTime, US_ROUNDTRIP_CM); // Convert uS to centimeters.
 }

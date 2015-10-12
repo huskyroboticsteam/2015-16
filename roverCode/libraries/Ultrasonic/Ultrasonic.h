@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// NewPing Library - v1.5 - 08/15/2012
+// Ultrasonic Library - v1.5 - 08/15/2012
 //
 // AUTHOR/LICENSE:
 // Created by Tim Eckel - teckel@leethost.com
@@ -16,12 +16,12 @@
 // BACKGROUND:
 // When I first received an ultrasonic sensor I was not happy with how poorly
 // it worked. Quickly I realized the problem wasn't the sensor, it was the
-// available ping and ultrasonic libraries causing the problem. The NewPing
+// available ping and ultrasonic libraries causing the problem. The Ultrasonic
 // library totally fixes these problems, adds many new features, and breaths
 // new life into these very affordable distance sensors. 
 //
 // FEATURES:
-// * Works with many different ultrasonic sensor models: SR04, SRF05, SRF06, DYP-ME007 & Parallax PING)))™.
+// * Works with many different ultrasonic sensor models: SR04, SRF05, SRF06, DYP-ME007 & Parallax PING)))ï¿½.
 // * Interface with all but the SRF06 sensor using only one Arduino pin.
 // * Doesn't lag for a full second if no ping/echo is received.
 // * Ping sensors consistently and reliably at up to 30 times per second.
@@ -35,7 +35,7 @@
 // * Actively developed with features being added and bugs/issues addressed.
 //
 // CONSTRUCTOR:
-//   NewPing sonar(trigger_pin, echo_pin [, max_cm_distance])
+//   Ultrasonic sonar(trigger_pin, echo_pin [, max_cm_distance])
 //     trigger_pin & echo_pin - Arduino pins connected to sensor trigger and echo.
 //       NOTE: To use the same Arduino pin for trigger and echo, specify the same pin for both values.
 //     max_cm_distance - [Optional] Maximum distance you wish to sense. Default=500cm.
@@ -49,9 +49,9 @@
 //   sonar.convert_cm(echoTime) - Convert echoTime from microseconds to centimeters (rounds to nearest cm).
 //   sonar.ping_timer(function) - Send a ping and call function to test if ping is complete.
 //   sonar.check_timer() - Check if ping has returned within the set distance limit.
-//   NewPing::timer_us(frequency, function) - Call function every frequency microseconds.
-//   NewPing::timer_ms(frequency, function) - Call function every frequency milliseconds.
-//   NewPing::timer_stop() - Stop the timer.
+//   Ultrasonic::timer_us(frequency, function) - Call function every frequency microseconds.
+//   Ultrasonic::timer_ms(frequency, function) - Call function every frequency milliseconds.
+//   Ultrasonic::timer_stop() - Stop the timer.
 //
 // HISTORY:
 // 08/15/2012 v1.5 - Added ping_median() method which does a user specified
@@ -60,7 +60,7 @@
 //   Optimized for smaller compiled size (even smaller than skteches that
 //   don't use a library).
 //
-// 07/14/2012 v1.4 - Added support for the Parallax PING)))™ sensor. Interface
+// 07/14/2012 v1.4 - Added support for the Parallax PING)))ï¿½ sensor. Interface
 //   with all but the SRF06 sensor using only one Arduino pin. You can also
 //   interface with the SRF06 using one pin if you install a 0.1uf capacitor
 //   on the trigger and echo pins of the sensor then tie the trigger pin to
@@ -73,7 +73,7 @@
 //   may cause (namely PWM on pins 3 & 11 on Arduino, PWM on pins 9 and 10 on
 //   Mega, and Tone library). Simple to use timer interrupt functions you can
 //   use in your sketches totaly unrelated to ultrasonic sensors (don't use if
-//   you're also using NewPing's ping_timer because both use Timer2 interrupts).
+//   you're also using Ultrasonic's ping_timer because both use Timer2 interrupts).
 //   Loop counting ping method deleted in favor of timing ping method after
 //   inconsistant results kept surfacing with the loop timing ping method.
 //   Conversion to cm and inches now rounds to the nearest cm or inch. Code
@@ -83,7 +83,7 @@
 //
 // 05/25/2012 v1.2 - Lots of code clean-up thanks to Adruino Forum members.
 //   Rebuilt the ping timing code from scratch, ditched the pulseIn code as it
-//   doesn't give correct results (at least with ping sensors). The NewPing
+//   doesn't give correct results (at least with ping sensors). The Ultrasonic
 //   library is now VERY accurate and the code was simplified as a bonus.
 //   Smaller and faster code as well. Fixed some issues with very close ping
 //   results when converting to inches. All functions now return 0 only when
@@ -100,8 +100,8 @@
 // 05/15/2012 v1.0 - Initial release.
 // ---------------------------------------------------------------------------
 
-#ifndef NewPing_h
-#define NewPing_h
+#ifndef Ultrasonic_h
+#define Ultrasonic_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include <Arduino.h>
@@ -126,12 +126,12 @@
 #define PING_MEDIAN_DELAY 29    // Millisecond delay between pings in the ping_median method.
 
 // Conversion from uS to distance (round result to nearest cm or inch).
-#define NewPingConvert(echoTime, conversionFactor) (max((echoTime + conversionFactor / 2) / conversionFactor, (echoTime ? 1 : 0)))
+#define UltrasonicConvert(echoTime, conversionFactor) (max((echoTime + conversionFactor / 2) / conversionFactor, (echoTime ? 1 : 0)))
 
 
-class NewPing {
+class Ultrasonic {
 	public:
-		NewPing(uint8_t trigger_pin, uint8_t echo_pin, int max_cm_distance = MAX_SENSOR_DISTANCE);
+		Ultrasonic(uint8_t trigger_pin, uint8_t echo_pin, int max_cm_distance = MAX_SENSOR_DISTANCE);
 		unsigned int ping();
 		unsigned int ping_in();
 		unsigned int ping_cm();
