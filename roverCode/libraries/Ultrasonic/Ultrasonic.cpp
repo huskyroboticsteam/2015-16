@@ -21,7 +21,7 @@ Ultrasonic::Ultrasonic(uint8_t trigger_pin, uint8_t echo_pin, int max_cm_distanc
 
 	_triggerMode = (uint8_t *) portModeRegister(digitalPinToPort(trigger_pin)); // Get the port mode register for the trigger pin.
 
-	_maxEchoTime = min(max_cm_distance, MAX_SENSOR_DISTANCE) * US_ROUNDTRIP_CM + (US_ROUNDTRIP_CM / 2); // Calculate the maximum distance in uS.
+	_maxEchoTime = min(max_cm_distance, MAX_SONAR_DISTANCE) * US_ROUNDTRIP_CM + (US_ROUNDTRIP_CM / 2); // Calculate the maximum distance in uS.
 
 #if DISABLE_ONE_PIN == true
 	*_triggerMode |= _triggerBit; // Set trigger pin to output.
@@ -93,7 +93,7 @@ boolean Ultrasonic::ping_trigger() {
 	*_triggerMode &= ~_triggerBit;   // Set trigger pin to input (when using one Arduino pin this is technically setting the echo pin to input as both are tied to the same Arduino pin).
 #endif
 
-	_max_time =  micros() + MAX_SENSOR_DELAY;                  // Set a timeout for the ping to trigger.
+	_max_time =  micros() + MAX_SONAR_DELAY;                  // Set a timeout for the ping to trigger.
 	while (*_echoInput & _echoBit && micros() <= _max_time) {} // Wait for echo pin to clear.
 	while (!(*_echoInput & _echoBit))                          // Wait for ping to start.
 		if (micros() > _max_time) return false;                // Something went wrong, abort.

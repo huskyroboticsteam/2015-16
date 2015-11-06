@@ -26,4 +26,8 @@ convert_cm	KEYWORD2
 
 ###################################
 # Constants (LITERAL1)
+US_ROUNDTRIP_CM			KEYWORD1
+US_ROUNDTRIP_IN			KEYWORD1
+MAX_SONAR_DISTANCE		KEYWORD1
+MAX_SONAR_DELAY			KEYWORD1
 ###################################
