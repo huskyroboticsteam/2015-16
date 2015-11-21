@@ -2,6 +2,7 @@
 #include "config.h"
 #include <Ethernet.h>
 #include <EthernetUdp.h>
+<<<<<<< HEAD
 #include <Servo.h>
 #define DELAY 100
 Servo frontRight;
@@ -9,6 +10,10 @@ Servo frontLeft;
 Servo backRight;
 Servo backLeft;
 void motorControl(int, int, int, int);
+int frontRightVal;
+int frontLeftVal;
+int backRightVal;
+int backLeftVal;
 
 // GLOBAL VARIABLES //
 
