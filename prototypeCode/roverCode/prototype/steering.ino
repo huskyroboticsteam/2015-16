@@ -4,7 +4,7 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #include <Servo.h>
-#define DELAY 100
+#define DELAY 50
 Servo frontRight;
 Servo frontLeft;
 Servo backRight;
