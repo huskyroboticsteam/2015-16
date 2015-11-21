@@ -8,7 +8,7 @@
 // GLOBAL VARIABLES //
 EthernetUDP Udp;
 byte MAC_ADDRESS[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-IPAddress IP(192, 168, 1, 4);
+IPAddress IP(192, 168, 1, 51);
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
 int x = 0;
 int y = 0;
