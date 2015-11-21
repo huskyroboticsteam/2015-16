@@ -10,12 +10,13 @@ Servo frontLeft;
 Servo backRight;
 Servo backLeft;
 
+
 void calculateMotorSpeeds()
 {
     
 }
 
-void writeToMotors(int frontRightVal, int frontLeftVal, int backRightVal, int backLeftVal)
+void writeToMotors()
 {
     frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 1000, 2000));
     frontLeft.writeMicroseconds(map(frontLeftVal, -100, 100, 1000, 2000));
