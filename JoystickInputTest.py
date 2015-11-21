@@ -2,11 +2,36 @@ from __future__ import division
 from __future__ import print_function
 
 import pygame
+import socket
+import struct
 
 # Joystick Constants
 x = 0
 y = 0
 
+# Joystick Constants
+C_RIGHT = 1
+C_LEFT = 0
+A_RIGHT = 3
+A_LEFT = 2
+
+# UDP Constants
+TARGET_IP = "192.168.1.51"
+UDP_PORT = 8888
+MAX_BUFFER_SIZE =24
+
+# UDP Defaults message
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+message = "Hopefully that worked."
+
+def get_response():
+    try:
+        sock.sendto(message, (TARGET_IP, UDP_PORT))
+        data, address = sock.recvfrom(MAX_BUFFER_SIZE)
+        gps_tup = struct.unpack("%f%f", data)
+        print("Response: ", gps_tup[0:1])
+    except Exception as error:
+        print("")
 
 def joy2value(value, half_control=False):
     if half_control:
@@ -44,6 +69,32 @@ if __name__ == '__main__':
         for i in range(joynum):
             print("Joystick " + str(i) + " is: " + joystick[i].get_name() + " with " + str(joystick[i].get_numaxes()) + " axes.")
 
+                # Initialize
+        arm = []
+        for i in range(4):
+            arm.append(1)
+
+       # science = []
+     #   for i in range(3):
+      #      science.append(1)
+
+        hand = []
+        for i in range(4):
+            hand.append(1)
+
+        misc = []
+        for i in range(4):
+            misc.append(1)
+
+        # UDP
+        print("UDP Port: ", UDP_PORT)
+        print("Test Message: ", message)
+        print("Max Buffer Size: ", MAX_BUFFER_SIZE)
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        sock.bind(('0.0.0.0', UDP_PORT))
+        sock.settimeout(0.01)
 
         # Main Loop
         while True:
@@ -62,6 +113,19 @@ if __name__ == '__main__':
             print("y: " + str(y))
             pygame.time.wait(100)
 
+            message = ''.join([chr(x), chr(y)])
+
+            get_response()
+
+            '''p = Process(target=getResponse)
+            p.start()
+            p.join(100)
+            if(p.is_alive()):
+                print("Disconnect... Attempting to fix.")
+                p.terminate()
+                p.join()'''
+
+            pygame.time.wait(100)
 
     except KeyboardInterrupt:
         pygame.quit()
