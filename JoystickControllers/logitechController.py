@@ -119,22 +119,7 @@ if __name__ == '__main__':
             print("y2: " + str(y2))
             pygame.time.wait(100)
 
-            x = ((x1 - 128) + (x2 - 128)) + 128
-            y = ((y1 - 128) + (y2 - 128)) + 128
-
-            if x > 255:
-                x=255
-
-            if x < 0:
-                x=0
-
-            if y > 255:
-                y=255
-
-            if y < 0:
-                y=0
-
-            message = ''.join([chr(x), chr(y)])
+            message = ''.join([chr(x1), chr(y1), chr(x2), chr(y2)])
 
             get_response()
 
