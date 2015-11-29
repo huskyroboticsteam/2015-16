@@ -34,5 +34,3 @@ void motorControl(int frontRightVal, int frontLeftVal, int backRightVal, int bac
     backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 1000, 2000));
     delay(DELAY);
 }
-
-
