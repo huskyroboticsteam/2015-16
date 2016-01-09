@@ -1,78 +1,62 @@
 // All Functions for Wireless Communication //
-#include <SPI.h> 
 #include "Arduino.h"
 #include "config.h"
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-// GLOBAL VARIABLES //
-EthernetUDP Udp;
-byte MAC_ADDRESS[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-int UPD_PORT = 8888;
-IPAddress IP(192, 168, 1, 51);
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
-int x = 0;
-int y = 0;
+#define ALE_PIN 4
+#define ELEV_PIN 2
+
+const int xLow = 1067;
+const int xHigh = 1905;
+const int yLow = 1066;
+const int yHigh = 1905;
 
 void initializeWirelessCommunication()
 {
-    // Serial.begin(BAUD_RATE);
     Ethernet.begin(MAC_ADDRESS, IP);
     Udp.begin(UDP_PORT);
+    timeLastPacket = millis();
+    pinMode(ALE_PIN, INPUT);
+    pinMode(ELEV_PIN, INPUT);
+    //Serial.begin(9600);
 }
 
-void getPacket()
+
+void receiveWirelessData()
+{
+    networkStatus = parsePacketData();
+}
+
+
+bool parsePacketData()
 {
     int packetSize = Udp.parsePacket();
-    //Serial.println(x);
-    //Serial.println(y);
-    if(packetSize)
-    {
-        /*int actual = 0;
-        Serial.print("Received packet of size ");
-        Serial.println(packetSize);
-        Serial.print("From ");
-        IPAddress remote = Udp.remoteIP();
-        for (int i =0; i < 4; i++)
-        {
-          actual = (remote[i], HEX);
-          Serial.print(actual);
-          if (i < 3)
-          {
-              Serial.print(".");
-          }
-        }
-        Serial.print(", port ");
-        Serial.println(Udp.remotePort());*/
-    
-        // read the packet into packetBufffer
-        Udp.read(packetBuffer,UDP_TX_PACKET_MAX_SIZE);
-        //Serial.println("Contents:");
-        //Serial.println(packetBuffer);
+    if(packetSize == 2) {
+        hasIP = true;
+        Udp.read(packetBuffer, 96);
+        inputAngle = map(((unsigned char)packetBuffer[0]) & 0xFFFF, 0, 255, 45, -45);
+        speed = map(((unsigned char)packetBuffer[1]) & 0xFFFF, 0, 255, 100, -100);
+        return true;
     }
+    return false;
 }
 
-void parsePacketData()
+void receiveDX6iData()
 {
-    boolean isFirstHalf = true;
-    for (int i = 0; i < UDP_TX_PACKET_MAX_SIZE; i++)
-    {
-        if (packetBuffer[i] != '\0')
-        {
-            char current = packetBuffer[i];
-            if (current == ',')
-            {
-                isFirstHalf = false;
-            }
-            else if (isFirstHalf)
-            {
-                x = x*10 + (packetBuffer[i] - 48);
-            }
-            else
-            {
-                y = y*10 + (packetBuffer[i] - 48);
-            }
-        }
+    int valuex = pulseIn(ALE_PIN, HIGH);
+    int valuey = pulseIn(ELEV_PIN, HIGH);
+    inputAngle = map(valuex, xLow, xHigh, 45, -45);
+    speed = map(valuey, yLow, yHigh, -100, 100);
+}
+
+void timeoutCheck()
+{
+    if(millis() - timeLastPacket >= TIMEOUT) {
+        frontRight.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
+        frontLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
+        backRight.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
+        backLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
     }
 }
 

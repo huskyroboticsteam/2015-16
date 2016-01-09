@@ -2,40 +2,43 @@
 #include "config.h"
 #include <Ethernet.h>
 #include <EthernetUdp.h>
-<<<<<<< HEAD
 #include <Servo.h>
-#define DELAY 100
+
+EthernetUDP Udp;
+byte MAC_ADDRESS[] = {0x90, 0xA2, 0xDA, 0x00, 0x3D, 0x8B};
+IPAddress IP(192, 168, 1, 51);
+char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+bool networkStatus = true;
+bool hasIP = false;
+bool useDX6i = true;
+unsigned long timeLastPacket; // to be set to millis() in main code
+
+int inputAngle  = 10;
+int speed  = 128;
+int motorRatio = 1;
+int currentAngle = 0;
+
 Servo frontRight;
 Servo frontLeft;
 Servo backRight;
 Servo backLeft;
-void motorControl(int, int, int, int);
-int frontRightVal;
-int frontLeftVal;
-int backRightVal;
-int backLeftVal;
-
-// GLOBAL VARIABLES //
-
+int frontRightVal = 0;
+int frontLeftVal = 0;
+int backRightVal = 0;
+int backLeftVal = 0;
 
 void setup()
 {
     initializeWirelessCommunication();
+    initializeSteeringSystem();
 }
 
 void loop()
 {
-    getPacket();
-    parsePacketData();
-    calculateMotorSpeeds();
+    receiveDX6iData();
+//  receiveWirelessData();
+//  calculateMotorSpeeds();
     writeToMotors();
+    timeoutCheck();
 }
 
-void motorControl(int frontRightVal, int frontLeftVal, int backRightVal, int backLeftVal)
-{
-    frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 1000, 2000));
-    frontLeft.writeMicroseconds(map(frontLeftVal, -100, 100, 1000, 2000));
-    backRight.writeMicroseconds(map(backRightVal, -100, 100, 1000, 2000));
-    backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 1000, 2000));
-    delay(DELAY);
-}
