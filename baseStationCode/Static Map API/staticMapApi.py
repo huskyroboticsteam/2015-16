@@ -8,12 +8,6 @@ tested with Python27 and Python34  by  vegaseat  10mar2015
 
 import io
 import pygame as pg
-try:
-    # Python2
-    from urllib2 import urlopen
-except ImportError:
-    # Python3
-    from urllib.request import urlopen
 
 # initialize pygame
 pg.init()
@@ -32,6 +26,9 @@ def getUrl(latitude, longitude, zoom, horizontal, vertical, key):
 
 # on a webpage right click on the image you want and use Copy image URL
 image_url = getUrl(20, 100, 10, 600, 400, apikey)
+
+#take the image retrieved from url and cache it
+urllib.urlretrieve(image_url, "00000001.jpg")
 
 image_str = urlopen(image_url).read()
 # create a file object (stream)
