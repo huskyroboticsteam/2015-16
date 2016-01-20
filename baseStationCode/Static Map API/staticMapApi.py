@@ -34,7 +34,12 @@ def getUrl(latitude, longitude, zoom, horizontal, vertical, key):
 # on a webpage right click on the image you want and use Copy image URL
 image_url = getUrl(20, 100, 10, 600, 400, apikey)
 
+# caches the image in same directory
+urllib.urlretrieve(image_url, "00000002.jpg")
+
+# opens image
 image_str = urlopen(image_url).read()
+
 # create a file object (stream)
 image_file = io.BytesIO(image_str)
 
