@@ -19,7 +19,7 @@ void initializeWirelessCommunication()
     timeLastPacket = millis();
     pinMode(ALE_PIN, INPUT);
     pinMode(ELEV_PIN, INPUT);
-    //Serial.begin(9600);
+    Serial.begin(9600);
 }
 
 

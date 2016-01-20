@@ -22,25 +22,51 @@ void calculateMotorSpeeds()
 void writeToMotors()
 {
     if(networkStatus == true) {
-        if(inputAngle > 8 || inputAngle < -8) {
+        int state = 0;
+        if(currentAngle <= 140) { // state 1
+            state = 1;
+            if(inputAngle > 8) { // doesn't want to keep turning left
+                frontRightVal = speed;
+                frontLeftVal = speed; 
+                backRightVal = speed;
+                backLeftVal = speed;
+            } else { // turning the other way (right)
+                frontRightVal = (speed + inputAngle);
+                frontLeftVal = (speed - inputAngle); 
+                backRightVal = (speed - inputAngle);
+                backLeftVal = (speed + inputAngle);
+            }
+        } else if (currentAngle >= 610) { // state 3
+            state = 3;
+            if(inputAngle < -8) { // doesn't want to keep turning right
+                frontRightVal = speed;
+                frontLeftVal = speed; 
+                backRightVal = speed;
+                backLeftVal = speed;
+            } else { // turning the other way (left)
+                frontRightVal = (speed + inputAngle);
+                frontLeftVal = (speed - inputAngle); 
+                backRightVal = (speed - inputAngle);
+                backLeftVal = (speed + inputAngle);
+            }            
+        } else { // state 2
+            state = 2;
             frontRightVal = (speed + inputAngle);
-            frontLeftVal = (speed - inputAngle);
+            frontLeftVal = (speed - inputAngle); 
             backRightVal = (speed - inputAngle);
             backLeftVal = (speed + inputAngle);
         }
-        else
-        {
-            frontRightVal = speed;
-            frontLeftVal = speed;
-            backRightVal = speed;
-            backLeftVal = speed;
-        }
-        timeLastPacket = millis();
+        Serial.println(state);
+        Serial.println(currentAngle);
+        timeLastPacket = millis(); 
         frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 2000, 1000));
         frontLeft.writeMicroseconds(map(frontLeftVal, -100, 100, 2000, 1000));
         backRight.writeMicroseconds(map(backRightVal, -100, 100, 2000, 1000));
         backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 1000, 2000));
     }
+    /* 
+     * 
+     */
 }
 
 void initializeSteeringSystem()
@@ -54,6 +80,6 @@ void initializeSteeringSystem()
 void readCurrentAngle()
 {
     currentAngle = analogRead(FEEDBACK_POTENTIOMETER_PIN);
-    currentAngle = (currentAngle, 0, 1024, -45, 45);
+    
 }
 

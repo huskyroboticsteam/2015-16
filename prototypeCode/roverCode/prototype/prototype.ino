@@ -10,7 +10,6 @@ IPAddress IP(192, 168, 1, 51);
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
 bool networkStatus = true;
 bool hasIP = false;
-bool useDX6i = true;
 unsigned long timeLastPacket; // to be set to millis() in main code
 
 int inputAngle  = 10;
@@ -35,10 +34,12 @@ void setup()
 
 void loop()
 {
-    receiveDX6iData();
-//  receiveWirelessData();
+   // receiveDX6iData();
+    receiveWirelessData();
+    readCurrentAngle();
 //  calculateMotorSpeeds();
     writeToMotors();
     timeoutCheck();
+   // Serial.println(inputAngle);
 }
 
