@@ -3,6 +3,8 @@ from __future__ import print_function
 
 import pygame
 import math
+import struct
+import socket
 
 # Joystick Constants
 x = 0
@@ -12,17 +14,36 @@ joystick = []
 joynum = 0
 joycommands = ["Arm", "Drive"]
 
+# Start Pygame
 pygame.init()
 # Loop until the user clicks the close button.
 done = False
 
+# UDP Constants
+#TARGET_IP = "192.168.0.2"
+#UDP_PORT = 8888
+#MAX_BUFFER_SIZE = 24
+
+#UDP Defaults message
+#sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#message = "I'm too old for this."
+
+# For sending UDP information
+#def get_response():
+ #   try:
+  #      sock.sendto(message, (TARGET_IP, UDP_PORT))
+   #     data, address = sock.recvfrom(MAX_BUFFER_SIZE)
+    #    gps_tup = struct.unpack("%f%f", data)
+     #   print("Response: ", gps_tup[0:1])
+    #except Exception as error:
+     #   print("")
+
 # Define some colors
-BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
 PURPLE = (60, 45, 112)
 GOLD = (213, 202, 148)
+RECTCOLOR = PURPLE
+TEXTCOLOR = GOLD
 
 PI = math.pi
 
@@ -30,21 +51,23 @@ PI = math.pi
 size = (700, 500)
 screen = pygame.display.set_mode(size)
 screen.fill(WHITE)
-rect = pygame.Rect(100, 100, 200, 200)
-rect2 = pygame.Rect(100, 400, 400, 100)
+button = pygame.Rect(100, 100, 200, 200)
+display = pygame.Rect(100, 400, 400, 100)
 pygame.display.set_caption("The Interactive Joystick Interface")
 font = pygame.font.SysFont('Arial', 25)
 
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
+# Processes the joystick values. Doubles if button for extra thrust is down, rounds values below 0.5 to 0
 def joy2value(value, half_control=False):
     if half_control:
         value /= 2.0
     if abs(value - 0) < 0.05:
-        value =0
+        value = 0
     return value
 
+# Mpas
 def float256(value, low, high):
     value = 256 * (value - low) / (high - low)
     value = max([value, 0])
@@ -53,12 +76,12 @@ def float256(value, low, high):
 
 def redraw_screen():
     screen.fill(WHITE)
-    rect = pygame.draw.rect(screen, PURPLE, pygame.Rect(100, 100, 200, 200), 0)
-    pygame.draw.rect(screen, PURPLE, pygame.Rect(100, 350, 400, 100), 0)
-    text = font.render('Connect Joysticks!', 1, GOLD)
+    button = pygame.draw.rect(screen, RECTCOLOR, pygame.Rect(100, 100, 200, 200), 0)
+    pygame.draw.rect(screen, RECTCOLOR, pygame.Rect(100, 350, 400, 100), 0)
+    text = font.render('Connect Joysticks!', 1, TEXTCOLOR)
     textpos = text.get_rect()
-    textpos.centerx = rect.centerx
-    textpos.centery = rect.centery
+    textpos.centerx = button.centerx
+    textpos.centery = button.centery
     screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
     pygame.display.flip()
 
@@ -86,11 +109,11 @@ def connect_joysticks(rect):
 
         while len(joystick) < joynum:
             pygame.event.pump()
-            pygame.draw.rect(screen, PURPLE, rect2, 0)
-            text = font.render(joycommands[len(joystick)], 1, GOLD) #array[len(joystick)]
+            pygame.draw.rect(screen, RECTCOLOR, display, 0)
+            text = font.render(joycommands[len(joystick)], 1, TEXTCOLOR) #array[len(joystick)]
             textpos = text.get_rect()
-            textpos.centerx = rect2.centerx
-            textpos.centery = rect2.centery
+            textpos.centerx = display.centerx
+            textpos.centery = display.centery
             screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
             pygame.display.flip()
             for i in range(joynum):
@@ -107,21 +130,32 @@ def connect_joysticks(rect):
     except KeyboardInterrupt:
         pygame.quit()
 
+if __name__ == '__main__':
+    print("foo")
+#    # UDP
+ #   print("UDP Port: ", UDP_PORT)
+  #  print("Test Message: ", message)
+   # print("Max Buffer Size: ", MAX_BUFFER_SIZE)
+
+    #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    #sock.bind(('0.0.0.0', UDP_PORT))
+    #sock.settimeout(0.01)
 
 # ------ Main Program Loop -------
 while not done:
     screen.fill(WHITE)
-    rect = pygame.draw.rect(screen, PURPLE, rect, 0)
-    rect2 = pygame.draw.rect(screen, PURPLE, pygame.Rect(100, 350, 400, 100), 0)
-    text = font.render('Connect Joysticks!', 1, GOLD)
+    button = pygame.draw.rect(screen, RECTCOLOR, button, 0)
+    display = pygame.draw.rect(screen, RECTCOLOR, pygame.Rect(100, 350, 400, 100), 0)
+    text = font.render('Connect Joysticks!', 1, TEXTCOLOR)
     textpos = text.get_rect()
-    textpos.centerx = rect.centerx
-    textpos.centery = rect.centery
+    textpos.centerx = button.centerx
+    textpos.centery = button.centery
     screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
-    text = font.render('Number of Connected Joysticks: ' + str(joynum), 1, GOLD)
+    text = font.render('Number of Connected Joysticks: ' + str(joynum), 1, TEXTCOLOR)
     textpos = text.get_rect()
-    textpos.centerx = rect2.centerx
-    textpos.centery = rect2.centery
+    textpos.centerx = display.centerx
+    textpos.centery = display.centery
     screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
 
     # --- Main event loop
@@ -129,9 +163,9 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            click = rect.collidepoint(pygame.mouse.get_pos())
+            click = button.collidepoint(pygame.mouse.get_pos())
             if click == 1:
-                joynum = connect_joysticks(rect)
+                joynum = connect_joysticks(button)
                 if joynum != 0:
                     joysticksConnected = True
 
