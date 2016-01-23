@@ -1,5 +1,6 @@
 import io
 import sys, pygame, pygame.font, pygame.event, pygame.draw, string
+import MercatorProjection
 from pygame.locals import *
 
 # Initialize pygame
@@ -30,24 +31,41 @@ fps = 60
 background = pygame.image.load("MarsDesertResearchStation.png")
 ball = pygame.image.load("ball.png")
 
+#TODO: fix blank entry problem
+#represents one coordinate, either a latitude or longitude
+class degreeMin:
+    def __init__(self, degree, minute, seconds):
+        if(degree == ""):
+            self.degrees = "0"
+        else:
+           self.degrees = degree
+        if(minute == ""):
+            self.min = "0"
+        else:
+            self.min = minute
+        if(seconds == ""):
+            self.sec = "0"
+        else:
+            self.sec = seconds
+
+    def toDecimal(self):
+        result = int(self.degrees) + (int(self.min) / 60.0) + (int(self.sec) / 360.0)
+        return result
+
 #defines a new class to store coordinates
 #this class stores the string representations of GPS coordinates that can be converted to pixels when needed.
 #TODO: fix coordinate return methods
 #TODO: create mapping function
-class Coordinate:
+class CoordinatePair:
     def __init__(self):
-        self.lat = ""
-        self.long = ""
+        self.lat = degreeMin(0, 0, 0)
+        self.long = degreeMin(0, 0, 0)
     #converts lat to a x position for display
     def xPos(self):
-        if self.lat == "":
-            return 0
-        return int(self.lat)
-    #converts long to a y position fo display
+        return int(self.lat.toDecimal())
+    #converts long to a y position for display
     def yPos(self):
-        if self.long == "":
-            return 0
-        return int(self.long)
+        return int(self.long.toDecimal())
 
 
 
@@ -100,14 +118,16 @@ while True:
                         textboxEnabled = False
                         commaSeen = False
                         coordRead = ""
-                        newCoord = Coordinate()
+                        newCoord = CoordinatePair()
+                        #TODO: add period entry to seperate degrees from minutes from seconds
                         #loops through all characters in the text box
                         for chars in range(len(current_string) + 1):
                             if chars == len(current_string):
-                                newCoord.long = coordRead
+
+                                newCoord.long.degrees = coordRead
                             elif current_string[chars] == ",":
                                 if not commaSeen:
-                                    newCoord.lat = coordRead
+                                    newCoord.lat.degrees = coordRead
                                     commaSeen = True
                                 coordRead = ""
                             else:
