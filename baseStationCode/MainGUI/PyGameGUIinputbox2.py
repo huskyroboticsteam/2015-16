@@ -30,10 +30,33 @@ fps = 60
 background = pygame.image.load("MarsDesertResearchStation.png")
 ball = pygame.image.load("ball.png")
 
+#defines a new class to store coordinates
+#this class stores the string representations of GPS coordinates that can be converted to pixels when needed.
+#TODO: fix coordinate return methods
+#TODO: create mapping function
+class Coordinate:
+    def __init__(self):
+        self.lat = ""
+        self.long = ""
+    #converts lat to a x position for display
+    def xPos(self):
+        if self.lat == "":
+            return 0
+        return int(self.lat)
+    #converts long to a y position fo display
+    def yPos(self):
+        if self.long == "":
+            return 0
+        return int(self.long)
+
+
+
+
+
 # Initialize preset variables
 textboxEnabled = False
 x, y, axisx, axisy = 0, 0, 0, 0
-markerListX, markerListY = [], []
+markerList = []
 
 def display_box(screen, message, boxPosX, boxPosY): # Taken from inputbox.py library - display box on screen w/ inputted text
 
@@ -66,28 +89,36 @@ while True:
             if (event.key == pygame.K_LEFT) and (textboxEnabled == False):
                 textboxEnabled = True
                 current_string = []
-
+            #reads in the coordinates
             if textboxEnabled == True:
                 if event.type == pygame.KEYDOWN:
                     inkey = event.key
                     if inkey == K_BACKSPACE:
                         current_string = current_string[0:-1]
+                    #converts typed coordinates to integers and adds them to the lists of coordinates
                     elif inkey == K_RETURN:
                         textboxEnabled = False
-
+                        commaSeen = False
                         coordRead = ""
+                        newCoord = Coordinate()
+                        #loops through all characters in the text box
                         for chars in range(len(current_string) + 1):
                             if chars == len(current_string):
-                                markerListY.append(int(coordRead))
+                                newCoord.long = coordRead
                             elif current_string[chars] == ",":
-                                markerListX.append(int(coordRead))
+                                if not commaSeen:
+                                    newCoord.lat = coordRead
+                                    commaSeen = True
                                 coordRead = ""
                             else:
                                 coordRead = coordRead + str(current_string[chars])
+                        markerList.append(newCoord)
                     elif inkey == K_MINUS:
                         current_string.append("_")
-                    elif (inkey >= 48 and inkey <= 57) or inkey == 44: # If key pressed is in the ASCII number range, or is a comma...
+                    #TODO: allow numberpad inputs.
+                    elif (inkey >= 48 and inkey <= 57) or inkey == 44 or inkey == 46: # If key pressed is in the ASCII number range, or is a comma or period...
                         current_string.append(chr(inkey))
+
     # end event queue loop
 
     screen.blit(fontCoordinateEntry, (10, 500))
@@ -98,8 +129,8 @@ while True:
     else:
         pygame.draw.rect(screen, (255, 255, 255), (125, 500, 150, 16), 1) # Draw white box (x, y, xlength, ylength, ?)
 
-    for balls in range(len(markerListX)):
-        screen.blit(ball, (markerListX[balls], markerListY[balls]))
+    for balls in range(len(markerList)):
+        screen.blit(ball, (markerList[balls].xPos(), markerList[balls].yPos()))
 
     if joystickson == True:
         axisx = joysticks[0].get_axis(0)
