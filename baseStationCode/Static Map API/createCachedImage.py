@@ -79,12 +79,11 @@ scale = ceil(max(info.current_w, info.current_h) / 640)
 print scale
 # print "horizontal = %s, vertical = %s" % (info.current_w, info.current_h)
 
+# can use this the corners with varying sizes to find lat and long for 
+# various pixel coordinates -> use those coords to query another segment of the map
+# from the API.
 cornersB = findCorners(40,-80, 15, 1280, 1280)
 screen = whiteScreen();
-# longitude = cornersB['W'] + (cornersB['E'] - cornersB['W']) * 5.0 / 4.0 
-# longitude = cornersB['W'] + 1600 * (cornersB['E'] - cornersB['W']) / 1280
-# latitude = cornersB['N'] + (cornersB['N'] - cornersB['S']) / 4.0
-# latitude = cornersB['N'] + 320 * (cornersB['N'] - cornersB['S']) / 1280
 bleh = findCorners(40,-80,15,1920,640)
 longitude = bleh['E']
 latitude = bleh['N']
