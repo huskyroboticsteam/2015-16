@@ -67,7 +67,48 @@ class CoordinatePair:
     def yPos(self):
         return int(self.long.toDecimal())
 
+#this function does all of the conversion from input to coordinates
+def convertCoords():
 
+    commaSeen = False
+    coordRead = ""
+    newCoord = CoordinatePair()
+    #loops through all characters in the text box
+    for chars in range(len(current_string) + 1):
+        if chars == len(current_string):
+            counter = 0
+            long = ""
+            for i in range(len(coordRead)):
+                long = long + str(coordRead[i])
+                if coordRead[i] == ".":
+                    counter += 1
+                    long = ""
+                elif counter == 0:
+                    newCoord.long.degrees = long
+                elif counter == 1:
+                    newCoord.long.min = long
+                elif counter == 2:
+                    newCoord.long.sec = long
+        elif current_string[chars] == ",":
+            if not commaSeen:
+                counter = 0
+                lat = ""
+                for i in range(len(coordRead)):
+                    lat = lat + str(coordRead[i])
+                    if coordRead[i] == ".":
+                        counter += 1
+                        lat = ""
+                    elif counter == 0:
+                        newCoord.lat.degrees = lat
+                    elif counter == 1:
+                        newCoord.lat.min = lat
+                    elif counter == 2:
+                        newCoord.lat.sec = lat
+                commaSeen = True
+            coordRead = ""
+        else:
+            coordRead = coordRead + str(current_string[chars])
+    markerList.append(newCoord)
 
 
 
@@ -116,28 +157,13 @@ while True:
                     #converts typed coordinates to integers and adds them to the lists of coordinates
                     elif inkey == K_RETURN:
                         textboxEnabled = False
-                        commaSeen = False
-                        coordRead = ""
-                        newCoord = CoordinatePair()
-                        #TODO: add period entry to seperate degrees from minutes from seconds
-                        #loops through all characters in the text box
-                        for chars in range(len(current_string) + 1):
-                            if chars == len(current_string):
-
-                                newCoord.long.degrees = coordRead
-                            elif current_string[chars] == ",":
-                                if not commaSeen:
-                                    newCoord.lat.degrees = coordRead
-                                    commaSeen = True
-                                coordRead = ""
-                            else:
-                                coordRead = coordRead + str(current_string[chars])
-                        markerList.append(newCoord)
+                        convertCoords()
                     elif inkey == K_MINUS:
                         current_string.append("_")
                     #TODO: allow numberpad inputs.
                     elif (inkey >= 48 and inkey <= 57) or inkey == 44 or inkey == 46: # If key pressed is in the ASCII number range, or is a comma or period...
                         current_string.append(chr(inkey))
+
 
     # end event queue loop
 
