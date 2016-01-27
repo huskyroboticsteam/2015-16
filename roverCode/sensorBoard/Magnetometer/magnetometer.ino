@@ -3,7 +3,6 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <stdio.h>
-#include <String.h>
 
 #include <EthernetUdp.h>
 // Enter a MAC address and IP address for your controller below.
@@ -12,8 +11,8 @@
 
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x0D, 0x89, 0x99 };
 
-IPAddress ip(192, 168, 1, 51);
-IPAddress ipComp(192, 168, 1, 5);
+IPAddress ipArduino(192, 168, 1, 51);
+IPAddress ipComputer(192, 168, 1, 5);
 //69, 91, 178, 233 192.168.1.51
 
 unsigned int localPort = 8888;      // local port to listen on
@@ -26,15 +25,13 @@ EthernetUDP Udp;
 LSM303 compass;
 
 void setup() {
-  
-  Serial.begin(9600);
-  Ethernet.begin(mac,ip);
-
+    
+  //setup Ethernet and compass
+  Ethernet.begin(mac,ipArduino);
   Udp.begin(localPort);
   Wire.begin();
   compass.init();
   compass.enableDefault();
-  Serial.println("STARTED>");
   
   /*
   Calibration values; the default values of +/-32767 for each axis
@@ -46,20 +43,25 @@ void setup() {
 }
 
 void loop() {
+  
+  //get heading from compass
   compass.read();
   float heading = compass.heading();
-  Udp.beginPacket(ipComp, 8888);
-  char arr1[1] = {'a'};
+
+  Udp.beginPacket(ipComputer, 8888);
+
+  //get digits of heading separately
   int hundred = (int)heading/100;
   int ten = (int)heading%100/10;
   int one = (int)heading%10;
+
+  //put heading in char array and send over udp
   char arr[3];
   arr[0] = (char)hundred+48;
   arr[1] = (char)ten+48;
   arr[2] = (char)one+48;
   Udp.write(arr);
   Udp.endPacket();
-  Serial.println(heading);
   delay(100);
 }
 
