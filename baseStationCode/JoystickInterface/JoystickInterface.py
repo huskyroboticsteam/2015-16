@@ -20,23 +20,13 @@ pygame.init()
 done = False
 
 # UDP Constants
-#TARGET_IP = "192.168.0.2"
-#UDP_PORT = 8888
-#MAX_BUFFER_SIZE = 24
+TARGET_IP = "192.168.1.51"
+UDP_PORT = 8888
+MAX_BUFFER_SIZE = 24
 
 #UDP Defaults message
-#sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#message = "I'm too old for this."
-
-# For sending UDP information
-#def get_response():
- #   try:
-  #      sock.sendto(message, (TARGET_IP, UDP_PORT))
-   #     data, address = sock.recvfrom(MAX_BUFFER_SIZE)
-    #    gps_tup = struct.unpack("%f%f", data)
-     #   print("Response: ", gps_tup[0:1])
-    #except Exception as error:
-     #   print("")
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+message = ""
 
 # Define some colors
 WHITE = (255, 255, 255)
@@ -131,16 +121,12 @@ def connect_joysticks(rect):
         pygame.quit()
 
 if __name__ == '__main__':
-    print("foo")
-#    # UDP
- #   print("UDP Port: ", UDP_PORT)
-  #  print("Test Message: ", message)
-   # print("Max Buffer Size: ", MAX_BUFFER_SIZE)
+    # UDP
+    print("UDP Port: ", UDP_PORT)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('0.0.0.0', UDP_PORT))
+    sock.settimeout(0.01)
 
-    #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    #sock.bind(('0.0.0.0', UDP_PORT))
-    #sock.settimeout(0.01)
 
 # ------ Main Program Loop -------
 while not done:
@@ -186,6 +172,10 @@ while not done:
             y = float256(y, -1, 1)
             print("x" + str(i) + ": " + str(x))
             print("y" + str(i) + ": " + str(y))
+            message = ''.join([chr(x), chr(y)])
+            # Send data over UDP, print recv
+            sock.sendto(message, (TARGET_IP, UDP_PORT))
+            pygame.time.wait(100)
 
         pygame.time.wait(100)
 
