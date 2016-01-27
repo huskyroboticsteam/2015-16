@@ -3,12 +3,11 @@ from __future__ import print_function
 
 import pygame
 import math
-import struct
 import socket
 
 # Joystick Constants
-x = 0
-y = 0
+angle = 0
+speed = 0
 joysticksConnected = False
 joystick = []
 joynum = 0
@@ -166,13 +165,13 @@ while not done:
 
     if joysticksConnected == True:
         for i in range(0, len(joystick)):
-            x = (joy2value(joystick[i].get_axis(0), (not joystick[i].get_button(0))))
-            y = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
-            x = float256(x, -1, 1)
-            y = float256(y, -1, 1)
-            print("x" + str(i) + ": " + str(x))
-            print("y" + str(i) + ": " + str(y))
-            message = ''.join([chr(x), chr(y)])
+            angle = (joy2value(joystick[i].get_axis(0), True))
+            speed = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
+            angle = float256(angle, -1, 1)
+            speed = float256(speed, -1, 1)
+            print("ANGLE: " + str(ord(chr(angle))))
+            print("SPEED: " + str(ord(chr(speed))))
+            message = ''.join([chr(angle), chr(speed)])
             # Send data over UDP, print recv
             sock.sendto(message, (TARGET_IP, UDP_PORT))
             pygame.time.wait(100)
