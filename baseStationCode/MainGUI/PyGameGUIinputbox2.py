@@ -1,5 +1,6 @@
 import io
 import sys, pygame, pygame.font, pygame.event, pygame.draw, string
+import MercatorProjection
 from pygame.locals import *
 
 # Initialize pygame
@@ -30,10 +31,50 @@ fps = 60
 background = pygame.image.load("MarsDesertResearchStation.png")
 ball = pygame.image.load("ball.png")
 
+#TODO: fix blank entry problem
+#represents one coordinate, either a latitude or longitude
+class degreeMin:
+    def __init__(self, degree, minute, seconds):
+        if(degree == ""):
+            self.degrees = "0"
+        else:
+           self.degrees = degree
+        if(minute == ""):
+            self.min = "0"
+        else:
+            self.min = minute
+        if(seconds == ""):
+            self.sec = "0"
+        else:
+            self.sec = seconds
+
+    def toDecimal(self):
+        result = int(self.degrees) + (int(self.min) / 60.0) + (int(self.sec) / 360.0)
+        return result
+
+#defines a new class to store coordinates
+#this class stores the string representations of GPS coordinates that can be converted to pixels when needed.
+#TODO: fix coordinate return methods
+#TODO: create mapping function
+class CoordinatePair:
+    def __init__(self):
+        self.lat = degreeMin(0, 0, 0)
+        self.long = degreeMin(0, 0, 0)
+    #converts lat to a x position for display
+    def xPos(self):
+        return int(self.lat.toDecimal())
+    #converts long to a y position for display
+    def yPos(self):
+        return int(self.long.toDecimal())
+
+
+
+
+
 # Initialize preset variables
 textboxEnabled = False
 x, y, axisx, axisy = 0, 0, 0, 0
-markerListX, markerListY = [], []
+markerList = []
 
 def display_box(screen, message, boxPosX, boxPosY): # Taken from inputbox.py library - display box on screen w/ inputted text
 
@@ -66,28 +107,38 @@ while True:
             if (event.key == pygame.K_LEFT) and (textboxEnabled == False):
                 textboxEnabled = True
                 current_string = []
-
+            #reads in the coordinates
             if textboxEnabled == True:
                 if event.type == pygame.KEYDOWN:
                     inkey = event.key
                     if inkey == K_BACKSPACE:
                         current_string = current_string[0:-1]
+                    #converts typed coordinates to integers and adds them to the lists of coordinates
                     elif inkey == K_RETURN:
                         textboxEnabled = False
-
+                        commaSeen = False
                         coordRead = ""
+                        newCoord = CoordinatePair()
+                        #TODO: add period entry to seperate degrees from minutes from seconds
+                        #loops through all characters in the text box
                         for chars in range(len(current_string) + 1):
                             if chars == len(current_string):
-                                markerListY.append(int(coordRead))
+
+                                newCoord.long.degrees = coordRead
                             elif current_string[chars] == ",":
-                                markerListX.append(int(coordRead))
+                                if not commaSeen:
+                                    newCoord.lat.degrees = coordRead
+                                    commaSeen = True
                                 coordRead = ""
                             else:
                                 coordRead = coordRead + str(current_string[chars])
+                        markerList.append(newCoord)
                     elif inkey == K_MINUS:
                         current_string.append("_")
-                    elif (inkey >= 48 and inkey <= 57) or inkey == 44: # If key pressed is in the ASCII number range, or is a comma...
+                    #TODO: allow numberpad inputs.
+                    elif (inkey >= 48 and inkey <= 57) or inkey == 44 or inkey == 46: # If key pressed is in the ASCII number range, or is a comma or period...
                         current_string.append(chr(inkey))
+
     # end event queue loop
 
     screen.blit(fontCoordinateEntry, (10, 500))
@@ -98,8 +149,8 @@ while True:
     else:
         pygame.draw.rect(screen, (255, 255, 255), (125, 500, 150, 16), 1) # Draw white box (x, y, xlength, ylength, ?)
 
-    for balls in range(len(markerListX)):
-        screen.blit(ball, (markerListX[balls], markerListY[balls]))
+    for balls in range(len(markerList)):
+        screen.blit(ball, (markerList[balls].xPos(), markerList[balls].yPos()))
 
     if joystickson == True:
         axisx = joysticks[0].get_axis(0)
