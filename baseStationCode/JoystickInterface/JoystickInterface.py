@@ -11,7 +11,7 @@ speed = 0
 joysticksConnected = False
 joystick = []
 joynum = 0
-joycommands = ["Arm", "Drive"]
+joycommands = ["Drive"]
 
 # Start Pygame
 pygame.init()
@@ -40,8 +40,8 @@ PI = math.pi
 size = (700, 500)
 screen = pygame.display.set_mode(size)
 screen.fill(WHITE)
-button = pygame.Rect(100, 100, 200, 200)
-display = pygame.Rect(100, 400, 400, 100)
+BUTTON = pygame.Rect(100, 100, 250, 200)
+DISPLAY = pygame.Rect(100, 350, 400, 100)
 pygame.display.set_caption("The Interactive Joystick Interface")
 font = pygame.font.SysFont('Arial', 25)
 
@@ -65,8 +65,8 @@ def float256(value, low, high):
 
 def redraw_screen():
     screen.fill(WHITE)
-    button = pygame.draw.rect(screen, RECTCOLOR, pygame.Rect(100, 100, 200, 200), 0)
-    pygame.draw.rect(screen, RECTCOLOR, pygame.Rect(100, 350, 400, 100), 0)
+    button = pygame.draw.rect(screen, RECTCOLOR, BUTTON, 0)
+    pygame.draw.rect(screen, RECTCOLOR, DISPLAY, 0)
     text = font.render('Connect Joysticks!', 1, TEXTCOLOR)
     textpos = text.get_rect()
     textpos.centerx = button.centerx
@@ -130,8 +130,14 @@ if __name__ == '__main__':
 # ------ Main Program Loop -------
 while not done:
     screen.fill(WHITE)
-    button = pygame.draw.rect(screen, RECTCOLOR, button, 0)
-    display = pygame.draw.rect(screen, RECTCOLOR, pygame.Rect(100, 350, 400, 100), 0)
+    logo = pygame.image.load("robotics.jpeg")
+    logorect = logo.get_rect()
+
+    logorect.centerx = 500
+    logorect.centery = 200
+    screen.blit(logo, logorect)
+    button = pygame.draw.rect(screen, RECTCOLOR, BUTTON, 0)
+    display = pygame.draw.rect(screen, RECTCOLOR, DISPLAY, 0)
     text = font.render('Connect Joysticks!', 1, TEXTCOLOR)
     textpos = text.get_rect()
     textpos.centerx = button.centerx
