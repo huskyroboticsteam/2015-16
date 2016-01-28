@@ -1,0 +1,1 @@
+CurrentCameraUI depends on CameraUI.glade which must be put in the same project directory as the python file!
