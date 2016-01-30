@@ -36,7 +36,7 @@ roverImage = pygame.image.load("rover.png")
 
 
 
-#TODO: fix blank entry problem
+
 #represents one coordinate, either a latitude or longitude
 class degreeMin:
     def __init__(self, degree, minute, seconds):
@@ -71,6 +71,8 @@ class CoordinatePair:
     #converts long to a y position for display
     def yPos(self):
         return int(self.long.toDecimal())
+    def toString(self):
+        return str(self.lat.degrees) + "." + str(self.lat.min) + "." + str(self.lat.sec) + "," + str(self.long.degrees) + "." + str(self.long.min) + "." + str(self.long.sec)
 
 #this function does all of the conversion from input to coordinates
 def convertCoords(current_string):
@@ -131,7 +133,17 @@ def getRoverGPS():
     rover_string = "800.100.0,400.200.100"
     return convertCoords(rover_string)
 
+#this is supposed to display the coordinates in a box that can be deleted and edited.
+#TODO: fix this. Figure out how to display a box and edit that box.
+def displayCoordList():
+    listXPos = 100
+    listYPos = 600
+    for x in markerList:
+        xString = x.toString
+        listDisplayBox = fontobject.render(xString, 0, (255,255,255)) # (text, antialias, (r, g, b))
+        screen.blit(listDisplayBox, (listXPos + 4, ListYPos)) # (font object, (xpos, ypos))
 
+        listYPos = listYPos + 50
 
 
 
@@ -146,7 +158,7 @@ def printList():
     print "end of list"
 
 
-
+#displays the text box for coord input
 def display_box(screen, message, boxPosX, boxPosY): # Taken from inputbox.py library - display box on screen w/ inputted text
 
     if len(message) != 0:
@@ -199,6 +211,8 @@ while True:
 
     roverPos = getRoverGPS()
     # end event queue loop
+
+
     screen.blit(fontCoordinateEntry, (10, 500))
 
     if textboxEnabled == True:
