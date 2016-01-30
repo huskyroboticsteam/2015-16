@@ -31,8 +31,12 @@ message = ""
 WHITE = (255, 255, 255)
 PURPLE = (60, 45, 112)
 GOLD = (213, 202, 148)
+RED = (205, 40, 40)
+BLACK = (0, 0, 0)
 RECTCOLOR = PURPLE
 TEXTCOLOR = GOLD
+POTCOLOR = RED
+STOPCOLOR = RED
 
 PI = math.pi
 
@@ -42,6 +46,8 @@ screen = pygame.display.set_mode(size)
 screen.fill(WHITE)
 BUTTON = pygame.Rect(100, 100, 250, 200)
 DISPLAY = pygame.Rect(100, 350, 400, 100)
+STOP = pygame.Rect(500, 100, 175, 200)
+POT = pygame.Rect(362, 100, 125, 200)
 pygame.display.set_caption("The Interactive Joystick Interface")
 font = pygame.font.SysFont('Arial', 25)
 
@@ -67,6 +73,8 @@ def redraw_screen():
     screen.fill(WHITE)
     button = pygame.draw.rect(screen, RECTCOLOR, BUTTON, 0)
     pygame.draw.rect(screen, RECTCOLOR, DISPLAY, 0)
+    pygame.draw.rect(screen, STOPCOLOR, STOP, 0)    # is this needed?
+    pygame.draw.rect(screen, POTCOLOR, POT, 0)
     text = font.render('Connect Joysticks!', 1, TEXTCOLOR)
     textpos = text.get_rect()
     textpos.centerx = button.centerx
@@ -133,15 +141,27 @@ while not done:
     logo = pygame.image.load("robotics.jpeg")
     logorect = logo.get_rect()
 
-    logorect.centerx = 500
-    logorect.centery = 200
+    logorect.centerx = 575
+    logorect.centery = 400
     screen.blit(logo, logorect)
     button = pygame.draw.rect(screen, RECTCOLOR, BUTTON, 0)
     display = pygame.draw.rect(screen, RECTCOLOR, DISPLAY, 0)
+    stop = pygame.draw.rect(screen, STOPCOLOR, STOP, 0)
+    pot = pygame.draw.rect(screen, POTCOLOR, POT, 0)
     text = font.render('Connect Joysticks!', 1, TEXTCOLOR)
     textpos = text.get_rect()
     textpos.centerx = button.centerx
     textpos.centery = button.centery
+    screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
+    text = font.render('Emergency Stop', 1, TEXTCOLOR)
+    textpos = text.get_rect()
+    textpos.centerx = stop.centerx
+    textpos.centery = stop.centery
+    screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
+    text = font.render('Pot Stop', 1, TEXTCOLOR)
+    textpos = text.get_rect()
+    textpos.centerx = pot.centerx
+    textpos.centery = pot.centery
     screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
     text = font.render('Number of Connected Joysticks: ' + str(joynum), 1, TEXTCOLOR)
     textpos = text.get_rect()
@@ -150,6 +170,7 @@ while not done:
     screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
 
     # --- Main event loop
+    # TODO: add feature to send potentiometer off and emergency stop over UDP
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
@@ -159,6 +180,18 @@ while not done:
                 joynum = connect_joysticks(button)
                 if joynum != 0:
                     joysticksConnected = True
+            click = stop.collidepoint(pygame.mouse.get_pos())    # ESTOP button clicked
+            if click == 1:
+                if STOPCOLOR == RED:
+                    STOPCOLOR = BLACK
+                else:
+                    STOPCOLOR = RED
+            click = pot.collidepoint(pygame.mouse.get_pos())     # Pot Stop button clicked
+            if click == 1:
+                if POTCOLOR == RED:
+                    POTCOLOR = BLACK
+                else:
+                    POTCOLOR = RED
 
     # -- update screen
     pygame.display.flip()
