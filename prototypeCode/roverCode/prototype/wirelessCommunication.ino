@@ -33,18 +33,29 @@ bool parsePacketData()
 {
     int packetSize = Udp.parsePacket();
     if(packetSize == 2) {
-        bool negInput = false; // keeps track of negative inputs (right)
-        hasIP = true;
+                hasIP = true;
         Udp.read(packetBuffer, 96);
+
         inputAngle = map(((unsigned char)packetBuffer[0]) & 0xFFFF, 0, 255, 45, -45);
+        bool negInput = false; // keeps track of negative inputs (to turn right)
         if(inputAngle < 0) { // range is uneven, needs to even out the negative side
             inputAngle -= 1;
             negInput = true;
         }
-        inputAngle = (int) 25 * pow(2, (abs(inputAngle)-25)/5.0) - 0.78; // equation to change the speed exponentially
-        speed = map(((unsigned char)packetBuffer[1]) & 0xFFFF, 0, 255, 100, -100);
+        inputAngle = (int) 32 * pow(2, (abs(inputAngle)-25)/5.0) - 0.78; // equation to change the speed exponentially
         if (negInput) { // to get back negative input, if needed
             inputAngle *= -1;
+        }
+        
+        speed = map(((unsigned char)packetBuffer[1]) & 0xFFFF, 0, 255, 100, -100);
+        bool negSpeed = false; // keeps track of negative inputs (to go backwards)
+        if(speed < 0) { // range is uneven, needs to even out the negative side
+            speed -= 1;
+            negSpeed = true;
+        }
+        speed = (int) 10 * pow(2, (abs(speed)-25)/10.0) - 1.7; // equation to change the speed exponentially
+        if (negSpeed) { // to get back negative input, if needed
+            speed *= -1;
         }
         return true;
     }
