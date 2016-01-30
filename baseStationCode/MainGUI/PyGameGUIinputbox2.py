@@ -30,11 +30,10 @@ fps = 60
 # Load images
 background = pygame.image.load("MarsDesertResearchStation.png")
 ball = pygame.image.load("ball.png")
+roverImage = pygame.image.load("rover.png")
 
 # Initialize preset variables
-textboxEnabled = False
-x, y, axisx, axisy = 0, 0, 0, 0
-markerList = []
+
 
 
 #TODO: fix blank entry problem
@@ -74,8 +73,11 @@ class CoordinatePair:
         return int(self.long.toDecimal())
 
 #this function does all of the conversion from input to coordinates
-def convertCoords():
+def convertCoords(current_string):
 
+    """
+    :rtype : CoordinatePair
+    """
     commaSeen = False
     coordRead = ""
     newCoord = CoordinatePair()
@@ -114,8 +116,23 @@ def convertCoords():
             coordRead = ""
         else:
             coordRead = coordRead + str(current_string[chars])
-    markerList.append(newCoord)
-    printList()
+    return newCoord
+
+textboxEnabled = False
+x, y, axisx, axisy = 0, 0, 0, 0
+markerList = []
+roverPos = CoordinatePair()
+
+#gets rover GPS data:
+def getRoverGPS():
+    #TODO: get the serial input and save it in rover_string
+
+    #parse and return the data
+    rover_string = "800.100.0,400.200.100"
+    return convertCoords(rover_string)
+
+
+
 
 
 #prints the coordinates list. for debugging
@@ -171,14 +188,16 @@ while True:
                     #converts typed coordinates to integers and adds them to the lists of coordinates
                     elif inkey == K_RETURN:
                         textboxEnabled = False
-                        convertCoords()
+                        newCoord = convertCoords(current_string)
+                        markerList.append(newCoord)
+                        printList()
                     elif inkey == K_MINUS:
                         current_string.append("-")
                     #TODO: allow numberpad inputs.
                     elif (inkey >= 48 and inkey <= 57) or inkey == 44 or inkey == 46: # If key pressed is in the ASCII number range, or is a comma or period...
                         current_string.append(chr(inkey))
 
-
+    roverPos = getRoverGPS()
     # end event queue loop
     screen.blit(fontCoordinateEntry, (10, 500))
 
@@ -190,6 +209,7 @@ while True:
 
     for balls in range(len(markerList)):
         screen.blit(ball, (markerList[balls].xPos(), markerList[balls].yPos()))
+    screen.blit(roverImage, (roverPos.xPos(), roverPos.yPos()))
 
     if joystickson == True:
         axisx = joysticks[0].get_axis(0)
