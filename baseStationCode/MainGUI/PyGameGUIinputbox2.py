@@ -31,6 +31,12 @@ fps = 60
 background = pygame.image.load("MarsDesertResearchStation.png")
 ball = pygame.image.load("ball.png")
 
+# Initialize preset variables
+textboxEnabled = False
+x, y, axisx, axisy = 0, 0, 0, 0
+markerList = []
+
+
 #TODO: fix blank entry problem
 #represents one coordinate, either a latitude or longitude
 class degreeMin:
@@ -109,13 +115,20 @@ def convertCoords():
         else:
             coordRead = coordRead + str(current_string[chars])
     markerList.append(newCoord)
+    printList()
 
 
+#prints the coordinates list. for debugging
+def printList():
+    print "start of list"
+    for i in markerList:
+        print "Latitude:"
+        print str(i.lat.degrees) + "." + str(i.lat.min) + "." + str(i.lat.sec)
+        print "Longitude:"
+        print str(i.long.degrees) + "." + str(i.long.min) + "." + str(i.long.sec)
+    print "end of list"
 
-# Initialize preset variables
-textboxEnabled = False
-x, y, axisx, axisy = 0, 0, 0, 0
-markerList = []
+
 
 def display_box(screen, message, boxPosX, boxPosY): # Taken from inputbox.py library - display box on screen w/ inputted text
 
@@ -142,6 +155,7 @@ while True:
 
     screen.blit(ball,(x,y))
 
+    #handles all input and other events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:sys.exit()
         if event.type == pygame.KEYDOWN:
@@ -159,14 +173,13 @@ while True:
                         textboxEnabled = False
                         convertCoords()
                     elif inkey == K_MINUS:
-                        current_string.append("_")
+                        current_string.append("-")
                     #TODO: allow numberpad inputs.
                     elif (inkey >= 48 and inkey <= 57) or inkey == 44 or inkey == 46: # If key pressed is in the ASCII number range, or is a comma or period...
                         current_string.append(chr(inkey))
 
 
     # end event queue loop
-
     screen.blit(fontCoordinateEntry, (10, 500))
 
     if textboxEnabled == True:
