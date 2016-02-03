@@ -37,9 +37,8 @@ void loop()
    // receiveDX6iData();
     receiveWirelessData();
     readCurrentAngle();
-//  calculateMotorSpeeds();
+    calculateMotorSpeeds();
     writeToMotors();
     timeoutCheck();
-   // Serial.println(inputAngle);
 }
 
