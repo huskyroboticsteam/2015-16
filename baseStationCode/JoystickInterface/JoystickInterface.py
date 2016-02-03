@@ -11,6 +11,7 @@ speed = 0
 joysticksConnected = False
 joystick = []
 joynum = 0
+# Array with the types of joysticks that we have
 joycommands = ["Drive"]
 
 # Start Pygame
@@ -40,7 +41,7 @@ STOPCOLOR = RED
 
 PI = math.pi
 
-# Define characteristics of the screen
+# Define initial characteristics of the screen
 size = (700, 500)
 screen = pygame.display.set_mode(size)
 screen.fill(WHITE)
@@ -62,13 +63,14 @@ def joy2value(value, half_control=False):
         value = 0
     return value
 
-# Mpas
+# Maps values to range from 0 to 255
 def float256(value, low, high):
     value = 256 * (value - low) / (high - low)
     value = max([value, 0])
     value = min([value, 255])
     return int(value)
 
+# Method to redraw the default screen
 def redraw_screen():
     screen.fill(WHITE)
     button = pygame.draw.rect(screen, RECTCOLOR, BUTTON, 0)
@@ -82,12 +84,15 @@ def redraw_screen():
     screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
     pygame.display.flip()
 
+# Method to create the commands for connecting different joysticks
 def create_user_commands():
     for i in range(0, len(joycommands)):
         joycommands[i] = "Connect " + joycommands[i] + " Joystick"
 
+# Handles the connecting of the joysticks
 def connect_joysticks(rect):
     try:
+        # create the command to tell user to connect a certain joystick
         create_user_commands()
         font = pygame.font.Font(None, 36)
         text = font.render(joycommands[0], 1, (10, 10, 10))
@@ -95,15 +100,17 @@ def connect_joysticks(rect):
         textpos.centerx = rect.centerx
         textpos.centery = rect.centery
 
-        # Joystick
+        # Find out how many joysticks are connected to the computer
         pygame.joystick.init()
         pygame.display.init()
         joynum = pygame.joystick.get_count()
         print(str(joynum) + " joysticks connected.")
 
+        # Initialize joysticks
         for i in range(joynum):
             pygame.joystick.Joystick(i).init()
 
+        # Loop through joysticks to connect each one to interface individually
         while len(joystick) < joynum:
             pygame.event.pump()
             pygame.draw.rect(screen, RECTCOLOR, display, 0)
@@ -127,6 +134,7 @@ def connect_joysticks(rect):
     except KeyboardInterrupt:
         pygame.quit()
 
+# UDP initialization stuff
 if __name__ == '__main__':
     # UDP
     print("UDP Port: ", UDP_PORT)
@@ -137,10 +145,11 @@ if __name__ == '__main__':
 
 # ------ Main Program Loop -------
 while not done:
+    # Reset screen
     screen.fill(WHITE)
+    # Draw the rectangles on the screen
     logo = pygame.image.load("robotics.jpeg")
     logorect = logo.get_rect()
-
     logorect.centerx = 575
     logorect.centery = 400
     screen.blit(logo, logorect)
@@ -203,6 +212,7 @@ while not done:
     pygame.event.pump()
 
     if joysticksConnected == True:
+        # Process values for the joysticks
         for i in range(0, len(joystick)):
             angle = (joy2value(joystick[i].get_axis(0), True))
             speed = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
