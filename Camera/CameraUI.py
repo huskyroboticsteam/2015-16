@@ -7,7 +7,7 @@ pygtk.require("2.0")
 
 camOne = "rtsp://192.168.1.15:554/user=admin&password=&channel=1&stream=0.sdp"
 camTwo = "rtsp://192.168.1.20:554/user=admin&password=&channel=1&stream=0.sdp"
-camThree = "rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp"
+camThree = "rtsp://192.168.1.11:554/user=admin&password=&channel=1&stream=0.sdp"
 instance = vlc.Instance()
 
 
@@ -32,6 +32,26 @@ class VLCWidget(gtk.DrawingArea):
         self.set_size_request(320, 200)
 
 
+class VLCRecorder:
+
+    def __init__(self):
+
+        self.instance = vlc.Instance()
+
+        # Creates the VLC Player Object
+        self.player = self.instance.media_player_new()
+
+    def change_media(self, url, filename):
+
+        sout = "#transcode{vcodec=h264,vb=800,width=640,height=480,acodec=mp3,ab=128,channels=2,samplerate=44100}:file{mux=mp4,dst=" + filename + ".mp4}"
+
+        self.instance.vlm_add_broadcast("Test", url, sout, 0, None, True, False)
+        self.instance.vlm_play_media("Test")
+
+    def stop_recording(self):
+
+        self.instance.vlm_stop_media("Test")
+
 class MainUI:
 
     def __init__(self, urls):
@@ -43,6 +63,7 @@ class MainUI:
         self.Box = self.wTree.get_widget("Feeds")
         # Set a url reference for later
         self.urls = urls
+        self.recorder = VLCRecorder()
 
         # Initialize the initial stream and pack into window
         self.widgets = create_widgets(self.urls, [instance, instance, instance])
@@ -66,27 +87,7 @@ class MainUI:
             self.window.connect("destroy", gtk.main_quit)
 
     def button_clicked(self, button):
-        # Destroy widgets from the window
-        self.widgets = destroy_widgets(self.Box, self.widgets)
-        # Toggle button label and create new widgets for packing
-        self.widgets = feed_toggle(button, self.widgets)
-
-        # Use URLs for the length here, if we have an extra widget urls.length() + 1
-        # Will record but not be packed into the interface
-        for i in range(0, len(self.urls)):
-            self.Box.pack_start(self.widgets[i], expand=True, fill=True)
-
-
-def destroy_widgets(box, widgets):
-    # Get how many widgets are in the box
-    length = len(widgets)
-
-    # Remove all widgets from box and then delete reference to them
-    for i in range(0, length):
-        box.remove(widgets[i])
-        widgets[i] = ""
-
-    return widgets
+        self.widgets = feed_toggle(button, self.widgets, self.recorder)
 
 
 def create_widgets(urls, vlc_i):
@@ -107,28 +108,24 @@ def create_widgets(urls, vlc_i):
     return widgets
 
 
-def feed_toggle(button, widgets):
+def feed_toggle(button, widgets, recorder):
 
     # Use the button label to decide what to do
     name = button.get_label()
 
     if name == "Record Feed 1":
         button.set_label("Stop Recording Feed 1")
-        record_instance = vlc.Instance("--sout=#duplicate{dst=file{dst=cam1.mpg}}")
-        widgets = create_widgets([camOne, camTwo, camThree, camOne], [instance, instance, instance, record_instance])
+        recorder.change_media(camOne, "one")
 
     elif name == "Record Feed 2":
         button.set_label("Stop Recording Feed 2")
-        record_instance = vlc.Instance("--sout=#duplicate{dst=file{dst=cam2.mpg}}")
-        widgets = create_widgets([camOne, camTwo, camThree, camTwo], [instance, instance, instance, record_instance])
+        recorder.change_media(camTwo, "two")
 
     elif name == "Record Feed 3":
         button.set_label("Stop Recording Feed 3")
-        record_instance = vlc.Instance("--sout=#duplicate{dst=file{dst=cam3.mpg}}")
-        widgets = create_widgets([camOne, camTwo, camThree, camThree], [instance, instance, instance, record_instance])
+        recorder.change_media(camThree, "three")
 
     elif name == "Stop Recording Feed 1" or name == "Stop Recording Feed 2" or name == "Stop Recording Feed 3":
-        widgets = create_widgets([camOne, camTwo, camThree], [instance, instance, instance])
 
         if name == "Stop Recording Feed 1":
             button.set_label("Record Feed 1")
@@ -136,6 +133,8 @@ def feed_toggle(button, widgets):
             button.set_label("Record Feed 2")
         elif name == "Stop Recording Feed 3":
             button.set_label("Record Feed 3")
+
+        recorder.stop_recording()
 
     return widgets
 
