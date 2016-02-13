@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import struct
 import socket
+import os
 
 # Joystick import
 import pygame
@@ -18,7 +19,8 @@ A_RIGHT = 0
 # UDP Constants
 TARGET_IP = "192.168.1.177"
 UDP_PORT = 8888
-MAX_BUFFER_SIZE = 24
+MAX_BUFFER_SIZE = 2048
+# MAX_BUFFER_SIZE = 24
 
 # UDP Defaults message
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -27,14 +29,15 @@ message = "I'm too old for this."
 
 def get_response():
     try:
-        sock.sendto(message, (TARGET_IP, UDP_PORT))
+        message_buf = struct.pack(('!' + str(len(message)) + 's'), message.encode('utf-8'))
+        sock.sendto(message_buf, (TARGET_IP, UDP_PORT))
         data, address = sock.recvfrom(MAX_BUFFER_SIZE)
         gps_tup = struct.unpack("%f%f", data)
-        print("Response: ", gps_tup[0:1])
+        print("Response: ", gps_tup[0])
     except Exception as error:
-        print("")
-
-
+     print(error)
+    
+    
 
 def joy2value(value, half_control=False):
     if half_control:
@@ -93,6 +96,10 @@ if __name__ == '__main__':
         arm = []
         for i in range(4):
             arm.append(1)
+            
+        # Debugging: print process number to kill thread
+        print('DEBUG: Operating on process', os.getpid())
+     
         # UDP
         print("UDP Port: ", UDP_PORT)
         print("Test Message: ", message)
@@ -109,20 +116,19 @@ if __name__ == '__main__':
             pygame.event.pump()
         
             if joynum == 1:
-                print("TEST...")
                 arm[0] = float012(joystick[A_RIGHT].get_axis(3) * -1)
                 arm[2] = float012(joystick[A_RIGHT].get_axis(1))
                 arm[1] = bool012(joystick[A_RIGHT].get_button(4), joystick[A_RIGHT].get_button(2))
                 #arm[3] = bool012(joystick[A_RIGHT].get_button(5), joystick[A_RIGHT].get_button(3))
 
-            #print("LEFT: " + str(ord(chr(left))))
-            #print("RIGHT: " + str(ord(chr(right))))
+            # print("LEFT: " + str(ord(chr(left))))
+            # print("RIGHT: " + str(ord(chr(right))))
 
             armByte = chr(arm[0] | (arm[1] << 2) | (arm[2] << 4))
             
             message = ''.join([armByte])
 
-            # Send data over UDP, print recv
+            # Send data over UDP, print recv    
             get_response()
             
             '''p = Process(target=getResponse)
