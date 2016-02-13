@@ -1,12 +1,15 @@
 import io
 import sys, pygame, pygame.font, pygame.event, pygame.draw, string
 import MercatorProjection
+import forms
 from pygame.locals import *
 
 # Initialize pygame
 pygame.init()
 pygame.font.init()
 pygame.joystick.init()
+
+
 
 # Create array of connected joysticks
 joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
@@ -165,9 +168,17 @@ def display_box(screen, message, boxPosX, boxPosY): # Taken from inputbox.py lib
         fontDisplayBox = fontobject.render(message, 0, (255,255,255)) # (text, antialias, (r, g, b))
         screen.blit(fontDisplayBox, (boxPosX + 4, boxPosY)) # (font object, (xpos, ypos))
 
+#adds the needed text boxes and buttons on the left hand side
+#def addFormObjects(f):
+    #TODO: add input box
+
+    #TODO: add Select for coord list
+
+
 # end
 
-if len(joysticks) >= 1: # Determine if joystick input can be used, if not, run w/o this functionality
+
+if (len(joysticks) >= 1): # Determine if joystick input can be used, if not, run w/o this functionality
     joysticks[0].init()
     joystickson = True
 else:

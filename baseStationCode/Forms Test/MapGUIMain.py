@@ -1,7 +1,8 @@
 import sys, pygame, pygame.font, pygame.event, pygame.draw, string
 from pygame.locals import *
 from MapTile import MapTile
-
+from GPSCoordinates import *
+from forms import *
 # Initialize pygame
 pygame.init()
 pygame.font.init()
@@ -20,8 +21,8 @@ CoordBoxPosX, CoordBoxPosY = 125, 500
 mapUpperLeftCorner = (320, 0)
 
 # Define screen size, set screen
-screenSize = (screenWidth, screenHeight) = (1200 ,600)
-screen = pygame.display.set_mode(screenSize)
+screenSize = (screenWidth, screenHeight) = (1200, 600)
+screen = pygame.display.set_mode(screenSize, pygame.RESIZABLE)
 
 # Set fps
 clock = pygame.time.Clock()
@@ -29,15 +30,15 @@ fps = 60
 
 # Load images
 ball = pygame.image.load("ball.png")
+roverImage = pygame.image.load("rover.png")
+pointer = pygame.image.load("pointer.png")
 
 # Initialize preset variables
 textboxEnabled = False
-x, y, axisx, axisy = 0, 0, 0, 0
-markerListX, markerListY = [], []
-
-# --------------------------------------
-
-startingCoord = (20,-100) # Latitude, Longitude - center coordinate of upper-left tile
+roverPos = CoordinatePair()
+x, y, axisx, axisy = 900, 900, 0, 0
+markerList = []
+startingCoord = (20.001,-100) # Latitude, Longitude - center coordinate of upper-left tile
 tileArraySize = (2,4) # (n,m) (rows,columns)
 mapZoom = 13
 
@@ -46,6 +47,25 @@ borderDistance = startingTile.findBorderDistance() # Will return (longitude, lat
 
 mapTiles = [[0 for m in xrange(0, tileArraySize[1])] for n in xrange(0, tileArraySize[0])] # tileArraySize[0] is rows, tileArraySize[1] is columns
 numSaves = 0
+
+
+#forms:
+f = Form(False)
+input = Input('Test', 'default', label_size=18, input_border_color=(255,100,100), input_border_width=0, input_bg_color=(0,0,0,0))
+f.add_object("COORD ENTRY", input)
+def pixelToCoord(x,y):
+    coord = (startingCoord[0] - borderDistance[0] / 640 * (y - 320 - mapUpperLeftCorner[1]), #latitude
+             startingCoord[1] + borderDistance[1] / 640 * (x - 320 - mapUpperLeftCorner[0])) #longitude
+    return coord
+
+def coordToPixel(latitude,longitude): # TODO: FIX MATH
+    pixel = ( (latitude - startingCoord[0]) * 640 / borderDistance[0] + 320 + mapUpperLeftCorner[0],   # x-coordinate
+              (longitude - startingCoord[1]) * 640 / borderDistance[1] + 320 + mapUpperLeftCorner[1] ) # y-coordinate
+    return pixel
+
+pointerlocation = coordToPixel(20.02,-99.92)
+print pointerlocation
+# --------------------------------------
 
 for n in range(0,tileArraySize[0]):
     for m in range(0,tileArraySize[1]):
@@ -73,6 +93,15 @@ else:
 
 # end
 
+def printList():
+    print "start of list"
+    for i in markerList:
+        print "Latitude:"
+        print str(i.lat.degrees) + "." + str(i.lat.min) + "." + str(i.lat.sec)
+        print "Longitude:"
+        print str(i.long.degrees) + "." + str(i.long.min) + "." + str(i.long.sec)
+    print "end of list"
+
 while True:
 
     clock.tick(fps)
@@ -83,7 +112,7 @@ while True:
         for m in range(0,tileArraySize[1]):
             screen.blit(mapTiles[n][m].image,mapTiles[n][m].screenlocation)
 
-    screen.blit(ball,(x,y))
+    screen.blit(pointer,pointerlocation)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:sys.exit()
@@ -91,40 +120,41 @@ while True:
             if (event.key == pygame.K_LEFT) and (textboxEnabled == False):
                 textboxEnabled = True
                 current_string = []
-
+            #reads in the coordinates
             if textboxEnabled == True:
                 if event.type == pygame.KEYDOWN:
                     inkey = event.key
                     if inkey == K_BACKSPACE:
                         current_string = current_string[0:-1]
+                    #converts typed coordinates to integers and adds them to the lists of coordinates
                     elif inkey == K_RETURN:
                         textboxEnabled = False
-
-                        coordRead = ""
-                        for chars in range(len(current_string) + 1):
-                            if chars == len(current_string):
-                                markerListY.append(int(coordRead))
-                            elif current_string[chars] == ",":
-                                markerListX.append(int(coordRead))
-                                coordRead = ""
-                            else:
-                                coordRead = coordRead + str(current_string[chars])
+                        newCoord = convertCoords(current_string)
+                        markerList.append(newCoord)
+                        printList()
                     elif inkey == K_MINUS:
-                        current_string.append("_")
-                    elif (inkey >= 48 and inkey <= 57) or inkey == 44: # If key pressed is in the ASCII number range, or is a comma...
-                        current_string.append(chr(inkey))
-    # end event queue loop
+                        current_string.append("-")
+                    #TODO: allow numberpad inputs.
+                    elif (inkey >= 48 and inkey <= 57) or inkey == 44 or inkey == 46: # If key pressed is in the ASCII number range, or is a comma or period...
+                        if len(current_string) <= 30:
+                            current_string.append(chr(inkey))
 
     screen.blit(fontCoordinateEntry, (10, 500))
 
-    if textboxEnabled == True:
-        display_box(screen, string.join(current_string,""), CoordBoxPosX, CoordBoxPosY)
-        pygame.draw.rect(screen, (255, 0, 0), (125, 500, 150, 16), 1) # Draw white box (x, y, xlength, ylength, ?)
-    else:
-        pygame.draw.rect(screen, (255, 255, 255), (125, 500, 150, 16), 1) # Draw white box (x, y, xlength, ylength, ?)
+    #display all controls and  buttons here:
+    #input box
 
-    for balls in range(len(markerListX)):
-        screen.blit(ball, (markerListX[balls], markerListY[balls]))
+    f.run(screen)
+    #old code:
+    #if textboxEnabled == True:
+        #display_box(screen, string.join(current_string,""), CoordBoxPosX, CoordBoxPosY)
+        #pygame.draw.rect(screen, (255, 0, 0), (125, 500, 150, 16), 1) # Draw white box (x, y, xlength, ylength, ?)
+    #else:
+        #pygame.draw.rect(screen, (255, 255, 255), (125, 500, 150, 16), 1) # Draw white box (x, y, xlength, ylength, ?)
+
+    for balls in range(len(markerList)):
+        screen.blit(ball, (markerList[balls].xPos(), markerList[balls].yPos())) # Add code to make this convert coordinates to screen position
+    screen.blit(roverImage, (roverPos.xPos(), roverPos.yPos()))
 
     if joystickson == True:
         axisx = joysticks[0].get_axis(0)
