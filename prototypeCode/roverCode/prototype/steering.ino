@@ -4,9 +4,19 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
+bool checkPotStatus() 
+{
+    return (((unsigned char)packetBuffer[0]) & 0xFFFF) == 1;
+}
+
+bool checkEmerStatus()
+{
+    return (((unsigned char)packetBuffer[1]) & 0xFFFF) == 1;
+}
+
 void calculateMotorSpeeds()
 {
-    inputAngle = map(((unsigned char)packetBuffer[0]) & 0xFFFF, 0, 255, 45, -45);
+    inputAngle = map(((unsigned char)packetBuffer[2]) & 0xFFFF, 0, 255, 45, -45);
     bool negInput = false; // keeps track of negative inputs (to turn right)
     if(inputAngle < 0) { // range is uneven, needs to even out the negative side
         inputAngle -= 1;
@@ -17,7 +27,7 @@ void calculateMotorSpeeds()
         inputAngle *= -1;
     }
     
-    speed = map(((unsigned char)packetBuffer[1]) & 0xFFFF, 0, 255, 100, -100);
+    speed = map(((unsigned char)packetBuffer[3]) & 0xFFFF, 0, 255, 100, -100);
     bool negSpeed = false; // keeps track of negative inputs (to go backwards)
     if(speed < 0) { // range is uneven, needs to even out the negative side
         speed -= 1;

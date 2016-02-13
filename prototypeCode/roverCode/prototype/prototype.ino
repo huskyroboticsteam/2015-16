@@ -34,11 +34,14 @@ void setup()
 
 void loop()
 {
-   // receiveDX6iData();
-    receiveWirelessData();
-    readCurrentAngle();
-    calculateMotorSpeeds();
-    writeToMotors();
-    timeoutCheck();
+    if (checkEmerStatus)
+    {
+        // receiveDX6iData();
+        receiveWirelessData();
+        readCurrentAngle();
+        calculateMotorSpeeds();
+        writeToMotors();
+        timeoutCheck();
+    }
 }
 
