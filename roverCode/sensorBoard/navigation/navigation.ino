@@ -52,10 +52,10 @@ void loop()
   if(gpsDone) {
     magnetometerLoop();
     result[26] = '\0';
-  Serial.println(result);
-  Udp.beginPacket(ipComputer, localPort);
-  Udp.write(result);
-  Udp.endPacket();
+    Serial.println(result);
+    Udp.beginPacket(ipComputer, localPort);
+    Udp.write(result);
+    Udp.endPacket();
   }
   //mark end of result
   gpsDone = false;
