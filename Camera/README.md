@@ -1,1 +1,1 @@
-CurrentCameraUI depends on CameraUI.glade which must be put in the same project directory as the python file!
+CurrentCameraUI can only be run with the runner.py file!

@@ -3,12 +3,16 @@ import pygtk
 import gtk
 import gtk.glade
 import vlc
+import random
 pygtk.require("2.0")
 
-camOne = "rtsp://192.168.1.15:554/user=admin&password=&channel=1&stream=0.sdp"
-camTwo = "rtsp://192.168.1.20:554/user=admin&password=&channel=1&stream=0.sdp"
-camThree = "rtsp://192.168.1.11:554/user=admin&password=&channel=1&stream=0.sdp"
-instance = vlc.Instance()
+
+class ButtonWrap:
+
+    def __init__(self, id):
+        self.button = gtk.Button()
+        self.id = id
+        self.recording = False
 
 
 class VLCWidget(gtk.DrawingArea):
@@ -18,6 +22,8 @@ class VLCWidget(gtk.DrawingArea):
 
         # Creates the VLC Player Object
         self.player = vlc_i.media_player_new()
+        self.id = ""
+        self.url = ""
 
         # Give the Windows ID to VLC
         def handle_embed(*args):
@@ -34,116 +40,141 @@ class VLCWidget(gtk.DrawingArea):
 
 class VLCRecorder:
 
-    def __init__(self):
+    def __init__(self, lowEnd, highEnd):
 
         self.instance = vlc.Instance()
 
         # Creates the VLC Player Object
         self.player = self.instance.media_player_new()
+        self.numbers = []
+        self.lowEnd = lowEnd
+        self.highEnd = highEnd
 
-    def change_media(self, url, filename):
+    def instantiate_media(self, url, filename):
 
-        sout = "#transcode{vcodec=h264,vb=800,width=640,height=480,acodec=mp3,ab=128,channels=2,samplerate=44100}:file{mux=mp4,dst=" + filename + ".mp4}"
+        sout = "#transcode{vcodec=h264,vb=800,width=640,height=480,acodec=mp3,ab=128,channels=2,samplerate=44100}" \
+               ":file{mux=mp4,dst=" + self.create_random() + ".mp4}"
+        self.instance.vlm_add_broadcast(filename, url, sout, 0, None, True, False)
 
-        self.instance.vlm_add_broadcast("Test", url, sout, 0, None, True, False)
-        self.instance.vlm_play_media("Test")
+    def reset_media(self, url, filename):
+        self.instance.vlm_del_media(filename)
 
-    def stop_recording(self):
+        sout = "#transcode{vcodec=h264,vb=800,width=640,height=480,acodec=mp3,ab=128,channels=2,samplerate=44100}" \
+               ":file{mux=mp4,dst=" + self.create_random() + ".mp4}"
+        self.instance.vlm_add_broadcast(filename, url, sout, 0, None, True, False)
 
-        self.instance.vlm_stop_media("Test")
+    def start_recording(self, filename):
+        self.instance.vlm_play_media(filename)
+
+    def stop_recording(self, filename):
+        self.instance.vlm_stop_media(filename)
+
+    def create_random(self):
+        number = random.randint(self.lowEnd, self.highEnd)
+        keepChecking = True
+
+        while(keepChecking):
+            keepChecking = False
+            for i in range(0, len(self.numbers)):
+                if len(self.numbers) == self.highEnd - self.lowEnd:
+                    print("Ran out of filespace")
+                    quit(11111111111)
+                if self.numbers[i] == number:
+                    number = random.randint(self.lowEnd, self.highEnd)
+                    keepChecking = True
+                    break
+
+        self.numbers.append(number)
+        print(number)
+        return str(number)
+
 
 class MainUI:
 
-    def __init__(self, urls):
+    def __init__(self, urls, lowEnd, highEnd):
 
-        # Set the Glade file
-        self.gladefile = "CameraUI.glade"
-        self.wTree = gtk.glade.XML(self.gladefile)
-        # Get Vertical Box Object (With 3 Slots)
-        self.Box = self.wTree.get_widget("Feeds")
-        # Set a url reference for later
+        self.window = gtk.Window()
+        self.vertBox = gtk.VBox()
+        self.topHorBox = gtk.HBox()
+        self.bottomHorBox = gtk.HBox()
+
+        self.window.add(self.vertBox)
+        self.vertBox.add(self.topHorBox)
+        self.vertBox.add(self.bottomHorBox)
+
         self.urls = urls
-        self.recorder = VLCRecorder()
+        self.buttons = []
+        self.recorder = VLCRecorder(lowEnd, highEnd)
 
         # Initialize the initial stream and pack into window
-        self.widgets = create_widgets(self.urls, [instance, instance, instance])
+        self.widgets = create_widgets(self.urls)
         for i in range(0, len(self.urls)):
-            self.Box.pack_start(self.widgets[i], expand=True)
+            self.topHorBox.pack_start(self.widgets[i], expand=True)
+
+        for i in range(0, len(self.urls)):
+            self.recorder.instantiate_media(self.urls[i], str(i))
 
         # Connect all buttons to the callback function
-        self.recordOne = self.wTree.get_widget("button1")
-        self.recordOne.connect("clicked", self.button_clicked)
-        self.recordTwo = self.wTree.get_widget("button2")
-        self.recordTwo.connect("clicked", self.button_clicked)
-        self.recordThree = self.wTree.get_widget("button3")
-        self.recordThree.connect("clicked", self.button_clicked)
+        for i in range(0, len(self.urls)):
+            buttonWrap = ButtonWrap(i)
+            buttonWrap.button.set_label("Record Feed " + str(i+1))
+            buttonWrap.button.connect("clicked", self.button_clicked)
+            self.bottomHorBox.add(buttonWrap.button)
+            self.buttons.append(buttonWrap)
 
         # Get the Main Window, and connect the "destroy" event
-        self.window = self.wTree.get_widget("MainWindow")
         if self.window:
-            # Shows Window
+            # Shows Window and all children objects
             self.window.show_all()
             # Closes infinite loop on pressing exit button (destroys main window)
             self.window.connect("destroy", gtk.main_quit)
 
     def button_clicked(self, button):
-        self.widgets = feed_toggle(button, self.widgets, self.recorder)
+        for i in range(0, len(self.buttons)):
+            if self.buttons[i].button == button:
+                record_toggle(self.buttons[i], self.urls, self.recorder)
 
 
-def create_widgets(urls, vlc_i):
+def create_widgets(urls):
     # Empty list to hold vlc widgets
     widgets = []
 
     # Check if the instances and url lengths match, if not there is a critical error
-    if len(urls) == len(vlc_i):
-        for i in range(0, len(urls)):
-            vlc_widget = VLCWidget(vlc_i[i])
-            player = vlc_widget.player
-            player.set_media(vlc_i[i].media_new(urls[i], ":network-caching=300"))
-            player.play()
-            widgets.append(vlc_widget)
-    else:
-        print("Number of connections and vlc instances do not match")
+    for i in range(0, len(urls)):
+        instance = vlc.Instance()
+        vlc_widget = VLCWidget(instance)
+        vlc_widget.id = i
+        vlc_widget.url = urls[i]
+        player = vlc_widget.player
+        player.set_media(instance.media_new(urls[i], ":network-caching=300"))
+        player.play()
+        widgets.append(vlc_widget)
 
     return widgets
 
 
-def feed_toggle(button, widgets, recorder):
+def record_toggle(buttonWrap, urls, recorder):
 
-    # Use the button label to decide what to do
-    name = button.get_label()
+    button = buttonWrap.button
+    id = buttonWrap.id
+    isRecording = buttonWrap.recording
 
-    if name == "Record Feed 1":
-        button.set_label("Stop Recording Feed 1")
-        recorder.change_media(camOne, "one")
-
-    elif name == "Record Feed 2":
-        button.set_label("Stop Recording Feed 2")
-        recorder.change_media(camTwo, "two")
-
-    elif name == "Record Feed 3":
-        button.set_label("Stop Recording Feed 3")
-        recorder.change_media(camThree, "three")
-
-    elif name == "Stop Recording Feed 1" or name == "Stop Recording Feed 2" or name == "Stop Recording Feed 3":
-
-        if name == "Stop Recording Feed 1":
-            button.set_label("Record Feed 1")
-        elif name == "Stop Recording Feed 2":
-            button.set_label("Record Feed 2")
-        elif name == "Stop Recording Feed 3":
-            button.set_label("Record Feed 3")
-
-        recorder.stop_recording()
-
-    return widgets
+    if isRecording == False:
+        button.set_label("Stop Recording Feed " + str(id+1))
+        recorder.start_recording(str(id))
+        buttonWrap.recording = True
+    elif isRecording:
+        button.set_label("Record Feed " + str(id+1))
+        buttonWrap.recording = False
+        recorder.stop_recording(str(id))
+        recorder.reset_media(urls[id], str(id))
 
 
 # Main Function
-if __name__ == "__main__":
+def main(urls, lowEnd, highEnd):
 
-    # Pass all URL RTSP parameters to the UI for initialization
-    hwg = MainUI([camOne, camTwo, camThree])
+    # Pass all URL RTSP parameters and random number generator bounds to the UI for initialization
+    MainUI(urls, lowEnd, highEnd)
 
     # Start the UI loop
     gtk.main()
