@@ -12,10 +12,11 @@ void calculateMotorSpeeds()
         inputAngle -= 1;
         negInput = true;
     }
-    inputAngle = (int) 32 * pow(2, (abs(inputAngle)-25)/5.0) - 0.78; // equation to change the speed exponentially
+    inputAngle = (int) 40 * pow(2, (abs(inputAngle)-25)/5.0) - 1.25; // equation to change the speed exponentially left/right
     if (negInput) { // to get back negative input, if needed
         inputAngle *= -1;
     }
+    Serial.println(inputAngle);
     
     speed = map(((unsigned char)packetBuffer[3]) & 0xFFFF, 0, 255, 100, -100);
     bool negSpeed = false; // keeps track of negative inputs (to go backwards)
@@ -23,15 +24,13 @@ void calculateMotorSpeeds()
         speed -= 1;
         negSpeed = true;
     }
-    speed = (int) 10 * pow(2, (abs(speed)-25)/10.0) - 1.7; // equation to change the speed exponentially
+    speed = (int) 10 * pow(2, (abs(speed)-25)/10.0) - 1.7; // equation to change the speed exponentially forward/back
     if (negSpeed) { // to get back negative input, if needed
         speed *= -1;
     }
 
     // left is positibe and right is negative
-    int state = 0; // going straight
     if(currentAngle <= 140) { // state 1 - going left
-        state = 1;
         if(inputAngle > 8) { // doesn't want to keep turning left
             frontRightVal = speed;
             frontLeftVal = speed; 
@@ -44,7 +43,6 @@ void calculateMotorSpeeds()
             backLeftVal = (speed + inputAngle);
         }
     } else if (currentAngle >= 610) { // state 3 - going right
-        state = 3;
         if(inputAngle < -8) { // doesn't want to keep turning right
             frontRightVal = speed;
             frontLeftVal = speed; 
@@ -57,7 +55,6 @@ void calculateMotorSpeeds()
             backLeftVal = (speed + inputAngle);
         }            
     } else { // state 2
-        state = 2;
         frontRightVal = (speed + inputAngle);
         frontLeftVal = (speed - inputAngle); 
         backRightVal = (speed - inputAngle);
