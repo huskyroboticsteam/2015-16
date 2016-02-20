@@ -78,7 +78,7 @@ class VLCRecorder:
             for i in range(0, len(self.numbers)):
                 if len(self.numbers) == self.highEnd - self.lowEnd:
                     print("Ran out of filespace")
-                    quit(11111111111)
+                    quit("You didn't define the filespace properly")
                 if self.numbers[i] == number:
                     number = random.randint(self.lowEnd, self.highEnd)
                     keepChecking = True
@@ -94,6 +94,8 @@ class MainUI:
     def __init__(self, urls, lowEnd, highEnd):
 
         self.window = gtk.Window()
+        self.window.set_title("Dope Cameras")
+        self.window.set_icon_from_file("icon.png")
         self.vertBox = gtk.VBox()
         self.topHorBox = gtk.HBox()
         self.bottomHorBox = gtk.HBox()
