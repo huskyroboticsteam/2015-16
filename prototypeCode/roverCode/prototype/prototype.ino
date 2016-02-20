@@ -35,23 +35,22 @@ void setup()
 
 void loop()
 {
-    
+    Serial.println(currentAngle);
   //  Serial.println((unsigned char)packetBuffer[1]);
     //    Serial.println("hi");
    // receiveDX6iData();
     receiveWirelessData();
-    Serial.print("POTENTIOMETER STATUS: ");
-    Serial.println((unsigned char)packetBuffer[0]);
-    Serial.print("EMERGENCY STOP STATUS: ");
-    Serial.println((unsigned char)packetBuffer[1]);
-    Serial.print("angle: ");
-    Serial.println((unsigned char)packetBuffer[2]);
-    Serial.print("speed: ");
-    Serial.println((unsigned char)packetBuffer[3]);
     if ((unsigned char)packetBuffer[1] == 1)
     {
-        readCurrentAngle();
-        calculateMotorSpeeds();
+        if ((unsigned char)packetBuffer[0] == 1)
+        {
+            readCurrentAngle();
+            calculateMotorSpeeds();
+        } 
+        else 
+        {
+            emergencyCalculateSpeeds();
+        }
         writeToMotors();
     }
     timeoutCheck();
