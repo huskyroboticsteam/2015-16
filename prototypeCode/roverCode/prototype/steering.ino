@@ -4,16 +4,6 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-bool checkPotStatus() 
-{
-    return (((unsigned char)packetBuffer[0]) & 0xFFFF) == 1;
-}
-
-bool checkEmerStatus()
-{
-    return (((unsigned char)packetBuffer[1]) & 0xFFFF) == 1;
-}
-
 void calculateMotorSpeeds()
 {
     inputAngle = map(((unsigned char)packetBuffer[2]) & 0xFFFF, 0, 255, 45, -45);

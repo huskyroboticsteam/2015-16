@@ -30,18 +30,30 @@ void setup()
 {
     initializeWirelessCommunication();
     initializeSteeringSystem();
+    Serial.begin(9600);
 }
 
 void loop()
 {
-    if (checkEmerStatus)
+    
+  //  Serial.println((unsigned char)packetBuffer[1]);
+    //    Serial.println("hi");
+   // receiveDX6iData();
+    receiveWirelessData();
+    Serial.print("POTENTIOMETER STATUS: ");
+    Serial.println((unsigned char)packetBuffer[0]);
+    Serial.print("EMERGENCY STOP STATUS: ");
+    Serial.println((unsigned char)packetBuffer[1]);
+    Serial.print("angle: ");
+    Serial.println((unsigned char)packetBuffer[2]);
+    Serial.print("speed: ");
+    Serial.println((unsigned char)packetBuffer[3]);
+    if ((unsigned char)packetBuffer[1] == 1)
     {
-        // receiveDX6iData();
-        receiveWirelessData();
         readCurrentAngle();
         calculateMotorSpeeds();
         writeToMotors();
-        timeoutCheck();
     }
+    timeoutCheck();
 }
 

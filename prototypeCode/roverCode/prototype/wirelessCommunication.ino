@@ -34,7 +34,7 @@ void receiveWirelessData()
 bool parsePacketData()
 {
     int packetSize = Udp.parsePacket();
-    if(packetSize == 2) {
+    if(packetSize == 4) {
                 hasIP = true;
         Udp.read(packetBuffer, 96);      
         return true;
