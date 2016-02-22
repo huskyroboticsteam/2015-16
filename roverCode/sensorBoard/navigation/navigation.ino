@@ -1,4 +1,31 @@
-#include <SoftwareSerial.h> //for gps
+/*
+  A few notes to be considered at this moment of development. 
+  - The reset function is broken without inputting the actual size.
+  - The potentiometer function needs to be re-written with flexibility 
+    in mind.
+  - The complete data packet(with potentiometer) over UDP has not
+    been tested.
+  - This does not work completely when data has not been recieved
+    from either(i.e anything breaks = everything broken).
+  - Oh! Comments are missing too.
+
+  Connection details : 
+  - Magnetometer : 
+    - vin -> 5V / 3.3V
+    - gnd -> Ground
+    - scl -> A5
+    - sda -> A4
+
+  - Potentiometer :
+    - Middle wire -> A0
+    - Side wires -> Ground and 5V (interchangeable)
+
+  - GPS : 
+    - TX0 -> Port 4
+    - Others are self explainatory
+*/
+//for gps
+#include <SoftwareSerial.h>
 
 //for udp over ethernet
 #include <Wire.h>
@@ -19,9 +46,14 @@ unsigned int localPort = 8888;
 SoftwareSerial gpsSerial(4, 5); // RX, TX (TX not used)
 const int sentenceSize = 80;
 char sentence[sentenceSize];
-LSM303 compass;
+LSM303 compass; //creates an object of LSM303
+// to check if the data has been recieved from the sensors
 bool gpsDone = false;
-char result[27];
+bool magDone = false;
+bool potDone = false;
+char result[40];  //intially it was 27
+int sensorValue = 0;
+int sensorPin = A0;
 
 void setup()
 {
@@ -49,22 +81,28 @@ void loop()
 {
   gpsLoop();
   result[22] = ',';
-  if(gpsDone) {
+  if(gpsDone)
+  {
     magnetometerLoop();
-    result[26] = '\0';
-    Serial.println(result);
-    Udp.beginPacket(ipComputer, localPort);
-    Udp.write(result);
-    Udp.endPacket();
+    if(magDone) 
+    {
+      potentiometerLoop();
+      if(potDone)
+      {
+        //result[strlen(result)] = '\0';
+        Serial.println(result);
+        Udp.beginPacket(ipComputer, localPort);
+        Udp.write(result);
+        Udp.endPacket();
+      }
+    }
   }
   //mark end of result
-  gpsDone = false;
-  for(int i=0; i<strlen(result); i++) {
-    result[i] = (char)0;
-  }
+  resetData();
 }
 
-void gpsLoop() {
+void gpsLoop()
+{
   static int i = 0;
   if (gpsSerial.available())
   {
@@ -83,7 +121,8 @@ void gpsLoop() {
   }
 }
 
-void magnetometerLoop() {
+void magnetometerLoop()
+{
   
   //get heading from compass
   compass.read();
@@ -98,6 +137,37 @@ void magnetometerLoop() {
   result[23] = (char)hundred+48;
   result[24] = (char)ten+48;
   result[25] = (char)one+48;
+  magDone = true;
+}
+
+// works but need to write a better code
+void potentiometerLoop()
+{
+  char buf[5];
+  sensorValue = analogRead(sensorPin);
+  sprintf(buf, "%04i", sensorValue);
+  result[strlen(result)] = ',';
+  buf[4] = '\0';
+  int start = strlen(result);
+  for(int i=0; i<strlen(buf) ; i++)
+  {
+    result[start+i] = buf[i];
+  }
+  result[strlen(result)] = '\0';
+  potDone = true;
+}
+
+void resetData()
+{
+  gpsDone = false;
+  magDone = false;
+  potDone = false;
+
+  // No idea why doesn't strlen(result) work now.
+  for(int i=0 ; i<40 ; i++)
+  {
+    result[i] = (char)0; 
+  }
 }
 
 void displayGPS()
@@ -124,16 +194,19 @@ void displayGPS()
 }
 
 //adds period between degrees and minutes
-void addPeriod(String field, char* result, int startIndex,int splitIndex) { 
+void addPeriod(String field, char* result, int startIndex,int splitIndex)
+{ 
     result[startIndex+splitIndex] = '.';
     
     //put digits before period into the result
-    for(int i=0;i<splitIndex;i++){
+    for(int i=0;i<splitIndex;i++)
+    {
         result[i + startIndex] = field[i];
     }
 
     //put digits after period into result
-    for(int i=splitIndex;i<field.length();i++) {
+    for(int i=splitIndex;i<field.length();i++)
+    {
         result[i + startIndex + 1] = field[i];
     }
 }
