@@ -11,7 +11,6 @@ speed = 0
 joysticks_connected = False
 joystick = []
 joynum = 0
-# Array with the types of joysticks that we have
 joycommands = ["Drive"]
 
 # Start Pygame
@@ -21,6 +20,7 @@ done = False
 
 # UDP Constants
 TARGET_IP = "192.168.1.51"
+#TARGET_IP = "173.250.159.234"
 UDP_PORT = 8888
 MAX_BUFFER_SIZE = 24
 
@@ -173,7 +173,6 @@ while not done:
     redraw_screen(False)
 
     # --- Main event loop
-    # TODO: add feature to send potentiometer off and emergency stop over UDP
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
@@ -217,13 +216,16 @@ while not done:
             # send a 1 if potentiometer is in use (red), 0 if we need to shut off (black)
             pot_flag = 1;
             if POTCOLOR == BLACK:
-                print(0)
+                pot_flag = 0;
             # send a 1 if emergency stop has not been clicked (red), 0 if everything needs to be turned off (black)
             stop_flag = 1;
             if STOPCOLOR == BLACK:
                 stop_flag = 0
             # send message in form of characters for the potentiometer flag, emergency stop flag, angle, and speed
             message = ''.join([chr(pot_flag), chr(stop_flag), chr(angle), chr(speed)])
+            print(message)
+            print(pot_flag)
+            #message = ''.join([str(pot_flag), str(stop_flag), str(angle), str(speed)])
             # Send data over UDP, print recv
             sock.sendto(message, (TARGET_IP, UDP_PORT))
             pygame.time.wait(100)
