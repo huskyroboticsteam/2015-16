@@ -24,7 +24,7 @@ class degreeMin:
 #this class stores the string representations of GPS coordinates that can be converted to pixels when needed.
 #TODO: fix coordinate return methods
 #TODO: create mapping function
-class CoordinatePair:
+class CoordinatePair: # Contains lat and long objects
     def __init__(self):
         self.lat = degreeMin(0, 0, 0)
         self.long = degreeMin(0, 0, 0)
