@@ -78,7 +78,7 @@ void emergencyCalculateSpeeds()
         inputAngle -= 1;
         negInput = true;
     }
-    inputAngle = (int) 32 * pow(2, (abs(inputAngle)-25)/5.0) - 0.78; // equation to change the speed exponentially
+    inputAngle = (int) 40 * pow(2, (abs(inputAngle)-25)/5.0) - 1.25; // equation to change the speed exponentially
     if (negInput) { // to get back negative input, if needed
         inputAngle *= -1;
     }
