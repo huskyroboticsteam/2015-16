@@ -25,7 +25,6 @@ void setup() {
   Ethernet.begin(mac,ipArduino);
   Udp.begin(localPort);
   Wire.begin();
-  Serial.begin(9600);
 }
 
 void loop() {
@@ -59,7 +58,6 @@ void loop() {
   sensorData[6] = (char)humidityTen;
   sensorData[7] = (char)humidityOne;
   sensorData[8] = '\0';
-  Serial.println(sensorData);
   Udp.write(sensorData);
   Udp.endPacket();
   delay(100);
