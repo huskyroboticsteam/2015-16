@@ -1,7 +1,6 @@
 import sys
 import pygtk
 import gtk
-import gtk.glade
 import vlc
 import random
 
