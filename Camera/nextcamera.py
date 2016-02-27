@@ -1,6 +1,7 @@
 import sys
 import pygtk
 import gtk
+import gobject
 import vlc
 import random
 
@@ -32,9 +33,9 @@ class VLCWidget(gtk.DrawingArea):
         # Give the Windows ID to VLC
         def handle_embed(*args):
             if sys.platform == 'win32':
-                self.player.set_hwnd(self.window.handle)
+                source = gobject.idle_add(self.set_window, self.window)
             else:
-                self.player.set_xwindow(self.window.xid)
+                source = gobject.idle_add(self.set_xwindow, self.window)
             return True
 
         # Once widget event map is run it will call the function handle_embed
@@ -45,6 +46,12 @@ class VLCWidget(gtk.DrawingArea):
             self.set_size_request(sizeX, sizeY)
         else:
             self.set_size_request(320, 200)
+
+    def set_window(self, window):
+            self.player.set_hwnd(window.handle)
+
+    def set_xwindow(self, window):
+            self.player.set_xwindow(window.xid)
 
 
 class VLCRecorder:
