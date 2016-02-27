@@ -7,14 +7,17 @@ import random
 
 pygtk.require("2.0")
 
+sizeX = 0
+sizeY = 0
+
 
 class ButtonWrap:
     # connects our buttons to the gtk lib
     # id's are unique to each button
     # sets the button to false so it doesn't record
-    def __init__(self, id):
+    def __init__(self, button_id):
         self.button = gtk.Button()
-        self.id = id
+        self.id = button_id
         self.recording = False
 
 
@@ -37,20 +40,24 @@ class VLCWidget(gtk.DrawingArea):
 
         # Once widget event map is run it will call the function handle_embed
         self.connect("map", handle_embed)
+
         # Set initial window size of widget
-        self.set_size_request(320, 200)
+        if sizeX != 0 and sizeY != 0:
+            self.set_size_request(sizeX, sizeY)
+        else:
+            self.set_size_request(320, 200)
 
 
 class VLCRecorder:
-    def __init__(self, lowEnd, highEnd):
+    def __init__(self, low_end, high_end):
 
         self.instance = vlc.Instance()
 
         # Creates the VLC Player Object
         self.player = self.instance.media_player_new()
         self.numbers = []
-        self.lowEnd = lowEnd
-        self.highEnd = highEnd
+        self.lowEnd = low_end
+        self.highEnd = high_end
 
     # makes the broadcasts that we will use to record
     def instantiate_media(self, url, filename):
@@ -75,17 +82,17 @@ class VLCRecorder:
 
     def create_random(self):
         number = random.randint(self.lowEnd, self.highEnd)
-        keepChecking = True
+        keep_checking = True
 
-        while (keepChecking):
-            keepChecking = False
+        while keep_checking:
+            keep_checking = False
             for i in range(0, len(self.numbers)):
                 if len(self.numbers) == self.highEnd - self.lowEnd:
                     print("Ran out of filespace")
                     quit("You didn't define the filespace properly")
                 if self.numbers[i] == number:
                     number = random.randint(self.lowEnd, self.highEnd)
-                    keepChecking = True
+                    keep_checking = True
                     break
 
         self.numbers.append(number)
@@ -94,7 +101,7 @@ class VLCRecorder:
 
 
 class MainUI:
-    def __init__(self, urls, lowEnd, highEnd):
+    def __init__(self, urls, low_end, high_end):
         """makes to window for display"""
         self.window = gtk.Window()
         # sets the icon and name of the window
@@ -103,8 +110,8 @@ class MainUI:
 
         # makes the "box" objects for the code
         self.vertBox = gtk.VBox()
-        self.topHorBox = gtk.HBox()
-        self.bottomHorBox = gtk.HBox()
+        self.topHorBox = gtk.HBox(homogeneous=True)
+        self.bottomHorBox = gtk.HBox(homogeneous=True)
 
         self.window.add(self.vertBox)
         # adds the boxes vertically then horrizontally
@@ -113,10 +120,9 @@ class MainUI:
         self.vertBox.add(self.bottomHorBox)
         # for the buttons
 
-
         self.urls = urls
         self.buttons = []
-        self.recorder = VLCRecorder(lowEnd, highEnd)
+        self.recorder = VLCRecorder(low_end, high_end)
 
         # Initialize the initial stream and pack into window
         self.widgets = create_widgets(self.urls)
@@ -128,11 +134,11 @@ class MainUI:
 
         # Connect all buttons to the callback function
         for i in range(0, len(self.urls)):
-            buttonWrap = ButtonWrap(i)
-            buttonWrap.button.set_label("Record Feed " + str(i + 1))
-            buttonWrap.button.connect("clicked", self.button_clicked)
-            self.bottomHorBox.add(buttonWrap.button)
-            self.buttons.append(buttonWrap)
+            button_wrap = ButtonWrap(i)
+            button_wrap.button.set_label("Record Feed " + str(i + 1))
+            button_wrap.button.connect("clicked", self.button_clicked)
+            self.bottomHorBox.add(button_wrap.button)
+            self.buttons.append(button_wrap)
 
         # Get the Main Window, and connect the "destroy" event
         if self.window:
@@ -164,28 +170,36 @@ def create_widgets(urls):
 
     return widgets
 
-#determines when to record
-def record_toggle(buttonWrap, urls, recorder):
-    button = buttonWrap.button
-    id = buttonWrap.id
-    isRecording = buttonWrap.recording
+
+def record_toggle(button_wrap, urls, recorder):
+    # determines when to record
+
+    button = button_wrap.button
+    button_id = button_wrap.id
+    is_recording = button_wrap.recording
 
     # id is used to determine which button and which camera is used
-    if isRecording == False:
-        button.set_label("Stop Recording Feed " + str(id + 1))
-        recorder.start_recording(str(id + 1))
-        buttonWrap.recording = True
-    elif isRecording:
-        button.set_label("Record Feed " + str(id + 1))
-        buttonWrap.recording = False
-        recorder.stop_recording(str(id + 1))
-        recorder.reset_media(urls[id], str(id + 1))
+    if not is_recording:
+        button.set_label("Stop Recording Feed " + str(button_id + 1))
+        recorder.start_recording(str(button_id + 1))
+        button_wrap.recording = True
+    elif is_recording:
+        button.set_label("Record Feed " + str(button_id + 1))
+        button_wrap.recording = False
+        recorder.stop_recording(str(button_id + 1))
+        recorder.reset_media(urls[button_id], str(button_id + 1))
 
 
 # Main Function
-def main(urls, lowEnd, highEnd):
+def main(urls, x, y, low_end, high_end):
+
+    global sizeX
+    sizeX = x
+    global sizeY
+    sizeY = y
+
     # Pass all URL RTSP parameters and random number generator bounds to the UI for initialization
-    MainUI(urls, lowEnd, highEnd)
+    MainUI(urls, low_end, high_end)
 
     # Start the UI loop
     gtk.main()
