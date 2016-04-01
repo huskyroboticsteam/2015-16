@@ -1,8 +1,10 @@
+import re
+
 # Classes and methods related to GPS coordinates and converting.
 
 # Class for the degree, minute, second coordinate structure.
 class degreeMin:
-    def __init__(self, degree, minute, seconds):
+    def __init__(self, degree, minute = 0.0, seconds = 0.0): # If minutes or seconds unprovided, go without
         if(degree == ""):
             self.degrees = "0"
         else:
@@ -17,7 +19,10 @@ class degreeMin:
             self.sec = seconds
 
     def toDecimal(self):
-        result = int(self.degrees) + (int(self.min) / 60.0) + (int(self.sec) / 360.0)
+        if self.degrees > 0.0: # If degrees value is positive, add minutes and seconds.
+            result = float(self.degrees) + (float(self.min) / 60.0) + (float(self.sec) / 3600.0)
+        if self.degrees <= 0.0: # If degrees value is negative, need to subtract minutes and seconds.
+            result = float(self.degrees) - (float(self.min) / 60.0) - (float(self.sec) / 3600.0)
         return result
 
 #defines a new class to store coordinates
@@ -37,7 +42,46 @@ class CoordinatePair: # Contains lat and long objects
     def toString(self):
         return str(self.lat.degrees) + "." + str(self.lat.min) + "." + str(self.lat.sec) + "," + str(self.long.degrees) + "." + str(self.long.min) + "." + str(self.long.sec)
 
-#this function does all of the conversion from input to coordinates
+# Austin's coordinate conversion class
+class Coordinates:
+    def __init__(self, current_string):
+        s = current_string.split(',')
+        print "split: " + str(s)
+        if len(s) < 2:
+            self.status = False
+        else:
+            tempLat = self.splitInput(s[0])
+            tempLong = self.splitInput(s[1])
+            print "templat: " + str(tempLat)
+            print "templong: " + str(tempLong)
+            self.latitude = self.format(tempLat)
+            self.longitude = self.format(tempLong)
+            print self.latitude
+            print self.longitude
+            self.status = True
+
+    # separates out all non-numeric values
+
+    def splitInput(self, s):
+        temp = filter(None, re.split(r'[^-\d.]+', s))
+        return self.castToFloat(temp)
+
+    def castToFloat(self, arr):
+        return [float(i) for i in arr]
+
+    def format(self, arr):
+        if len(arr) == 1: # If the input was just decimal, no minute or second entry
+            return float(arr[0]) # returns float if it is in standard format
+        elif len(arr) == 2: # If degrees and minutes provided...
+            degreeMinCoords = degreeMin(arr[0],arr[1])
+            return degreeMinCoords.toDecimal() # Use Brian's method to convert DMS format to decimals
+        elif len(arr) >= 3:
+            degreeMinSecCoords = degreeMin(arr[0],arr[1],arr[2])
+            return degreeMinSecCoords.toDecimal()
+
+# --------------------------------------------------------------------------------------
+
+# Brian's coordinate conversion function
 def convertCoords(current_string):
 
     """

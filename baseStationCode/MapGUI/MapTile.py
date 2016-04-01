@@ -42,6 +42,7 @@ class Map:
         self.borderDistance[0] = float(configFile.readline())
         self.borderDistance[1] = float(configFile.readline())
         print "yes it exists"
+        #TODO: Make this initialize
         self.ULcoord = (self.startingLocation[0] + self.borderDistance[0]/2, self.startingLocation[1] - self.borderDistance[1]/2)
         self.URcoord = (self.ULcoord[0], self.ULcoord[1] + self.dimensions[1]*self.borderDistance[1])
         self.LLcoord = (self.ULcoord[0] - self.dimensions[0]*self.borderDistance[0], self.ULcoord[1])
