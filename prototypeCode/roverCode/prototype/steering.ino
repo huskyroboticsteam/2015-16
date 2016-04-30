@@ -59,15 +59,6 @@ void calculateMotorSpeeds()
         backRightVal = (speed - inputAngle);
         backLeftVal = (speed + inputAngle);
     }
-    /*int angleDifference = 0;
-    readCurrentAngle();
-    motorRatio = ((VERTICAL_WHEEL_SEPARATION / 2 * tan(currentAngle)) + (0.5)(LATERAL_WHEEL_SEPARATION)) / ((VERTICAL_WHEEL_SEPARATION / 2 * tan(currentAngle) - (0.5)(LATERAL_WHEEL_SEPARATION));
-    angleDifference = TUNING_CONSTANT * (currentAngle - inputAngle);// difference in angle (input - actual)
-    // adjust morot speeds with error difference * constant
-    frontRightVal = motorRatio * speed;
-    frontLeftVal = motorRatio * speed;
-    backRightVal = motorRatio * speed;
-    backLeftVal = motorRatio * speed;*/
 }
 
 void emergencyCalculateSpeeds()
@@ -113,15 +104,13 @@ void writeToMotors()
 
 void initializeSteeringSystem()
 {
-    frontRight.attach(FRONT_RIGHT_PIN);
-    frontLeft.attach(FRONT_LEFT_PIN);
-    backRight.attach(BACK_RIGHT_PIN);
-    backLeft.attach(BACK_LEFT_PIN);
+    frontLeft.attach(MOTOR_1);
+    frontRight.attach(MOTOR_2);
+    backLeft.attach(MOTOR_3);
+    backRight.attach(MOTOR_4);
 }
 
 void readCurrentAngle()
 {
-    currentAngle = analogRead(FEEDBACK_POTENTIOMETER_PIN);
-    
+    currentAngle = analogRead(POTENTIOMETER);
 }
-
