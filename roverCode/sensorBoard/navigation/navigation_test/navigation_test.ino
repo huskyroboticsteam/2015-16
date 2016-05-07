@@ -24,9 +24,8 @@
     - degrees, minutes, and seconds of latitude and longitude
       separated by periods
 */
-#include <SoftwareSerial.h> //for gps
-#define ANALOG_PIN A6
 
+#include <SoftwareSerial.h> //for gps
 //for udp over ethernet
 #include <Wire.h>
 #include <Ethernet.h>
@@ -36,14 +35,23 @@
 
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP Udp;
-
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x0D, 0x89, 0x99 };
 
 IPAddress ipArduino(192, 168, 1, 51);
 IPAddress ipComputer(192, 168, 1, 5);
 unsigned int localPort = 8888;
 
-SoftwareSerial gpsSerial(A3, A2); // RX, TX (TX not used)
+// Change to true if using on robot main board. False for standalone arduino
+#define main_board false
+
+#if main_board
+  #define ANALOG_PIN A6
+  SoftwareSerial gpsSerial(A3, A2); // RX, TX (TX not used)
+#else
+  #define ANALOG_PIN A0
+  SoftwareSerial gpsSerial(4, 5); // RX, TX (TX not used)
+#endif
+
 const int sentenceSize = 80;
 char sentence[sentenceSize];
 LSM303 compass;
@@ -81,7 +89,6 @@ void loop()
 {
   
   gpsLoop();
-  //Serial.println("Returned");
   result[22] = ',';
   if(gpsDone)
   {
@@ -95,9 +102,9 @@ void loop()
         result[strlen(result)] = '\0';
         
         Serial.println(result);
-        Udp.beginPacket(ipComputer, localPort);
-        Udp.write(result);
-        Udp.endPacket();
+        //Udp.beginPacket(ipComputer, localPort);
+        //Udp.write(result);
+        //Udp.endPacket();
         resetData();
       }
     //}
@@ -121,27 +128,24 @@ void resetData()
 //reads data from gps and puts it into buffer
 void gpsLoop() {
   static int i = 0;
-
-  if (gpsSerial.available())
+  if(gpsSerial.available())
   {
-    char ch = gpsSerial.read();
-    Serial.print(ch);
-    while (ch != '\n' && i < sentenceSize)
+    char ch = (char) gpsSerial.read();
+    
+    if (ch != '\n' && i < sentenceSize)
     {
-      Serial.println("Loop");
-      sentence[i] = ch;
+      sentence[i] = ch;  
       i++;
-      ch = gpsSerial.read();
+    } else {
+      sentence[i] = '\0';
+      i = 0;
+      displayGPS();
     }
-    sentence[i] = '\0';
-    displayGPS();
   }
 }
 
 //reads magnetometer data and puts it in buffer
 void magnetometerLoop() {
-
-    Serial.println("Loop");
   
     //get heading from compass
     compass.read();  
@@ -185,9 +189,8 @@ void displayGPS()
 {
   char field[11];
   getField(field, 0);
-  if (strcmp(field, "$GPRMC") == 0)
+  if (strcmp(field, "$GPRMC") == 0 || strcmp(field, "GPRMC") == 0)
   {
-    
     //latitude
     getField(field, 3);  // number
     addPeriod(field, (char*)result, 0, 2);
