@@ -30,6 +30,7 @@ void setup()
 {
     initializeWirelessCommunication();
     initializeSteeringSystem();
+    initializeNavigation();
     Serial.begin(9600);
 }
 
@@ -40,6 +41,7 @@ void loop()
     //    Serial.println("hi");
    // receiveDX6iData();
     receiveWirelessData();
+    navigationLoop();
     if ((unsigned char)packetBuffer[1] == 1)
     {
         if ((unsigned char)packetBuffer[0] == 1)
