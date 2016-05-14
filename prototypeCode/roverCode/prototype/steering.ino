@@ -12,7 +12,7 @@ void calculateMotorSpeeds()
         inputAngle -= 1;
         negInput = true;
     }
-    inputAngle = (int) 40 * pow(2, (abs(inputAngle)-25)/5.0) - 1.25; // equation to change the speed exponentially left/right
+    inputAngle = (int) 35 * pow(2, (abs(inputAngle)-25)/15.0) - 11.024; // equation to change the speed exponentially left/right
     if (negInput) { // to get back negative input, if needed
         inputAngle *= -1;
     }
@@ -69,7 +69,7 @@ void emergencyCalculateSpeeds()
         inputAngle -= 1;
         negInput = true;
     }
-    inputAngle = (int) 40 * pow(2, (abs(inputAngle)-25)/5.0) - 1.25; // equation to change the speed exponentially
+    inputAngle = (int) 35 * pow(2, (abs(inputAngle)-25)/15.0) - 11.024; // equation to change the speed exponentially
     if (negInput) { // to get back negative input, if needed
         inputAngle *= -1;
     }
@@ -104,10 +104,10 @@ void writeToMotors()
 
 void initializeSteeringSystem()
 {
-    frontLeft.attach(MOTOR_1);
-    frontRight.attach(MOTOR_2);
+    backRight.attach(MOTOR_1);
+    frontLeft.attach(MOTOR_2);
     backLeft.attach(MOTOR_3);
-    backRight.attach(MOTOR_4);
+    frontRight.attach(MOTOR_4);
 }
 
 void readCurrentAngle()
