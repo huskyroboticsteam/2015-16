@@ -95,19 +95,19 @@ void writeToMotors()
 {
     if(networkStatus == true) {
         timeLastPacket = millis(); 
-        frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 2000, 1000));
+        frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 1000, 2000));
         frontLeft.writeMicroseconds(map(frontLeftVal, -100, 100, 2000, 1000));
-        backRight.writeMicroseconds(map(backRightVal, -100, 100, 2000, 1000));
-        backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 1000, 2000));
+        backRight.writeMicroseconds(map(backRightVal, -100, 100, 1000, 2000));
+        backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 2000, 1000));
     }
 }
 
 void initializeSteeringSystem()
 {
     backRight.attach(MOTOR_1);
-    frontLeft.attach(MOTOR_2);
-    backLeft.attach(MOTOR_3);
-    frontRight.attach(MOTOR_4);
+    frontRight.attach(MOTOR_2);
+    frontLeft.attach(MOTOR_3);
+    backLeft.attach(MOTOR_4);
 }
 
 void readCurrentAngle()
