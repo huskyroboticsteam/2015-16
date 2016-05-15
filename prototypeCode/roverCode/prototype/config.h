@@ -1,9 +1,9 @@
 // MOTOR CONTROL CONSTANTS //
 #define TALON_NEUTRAL_FREQUENCY 1500
 #define MOTOR_1    3 // BACK_RIGHT
-#define MOTOR_2    5 // FRONT_LEFT
-#define MOTOR_3    6 // BACK_LEFT
-#define MOTOR_4    9 // FRONT_RIGHT
+#define MOTOR_2    5 // FRONT_RIGHT
+#define MOTOR_3    6 // FRONT_LEFT
+#define MOTOR_4    9 // BACK_LEFT
 
 // ETHERNET COMMUNICATION CONSTANTS //
 #define UDP_PORT         8888
