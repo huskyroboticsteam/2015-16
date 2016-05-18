@@ -13,7 +13,7 @@ void calculateMotorSpeeds()
         inputAngle -= 1;
         negInput = true;
     }
-    inputAngle = (int) 35 * pow(2, (abs(inputAngle)-25)/15.0) - 11.024; // equation to change the speed exponentially left/right
+    inputAngle = (int) ((35 * pow(2, (abs(inputAngle)-25)/15.0) - 11.024)/4); // equation to change the speed exponentially left/right
     if (negInput) { // to get back negative input, if needed
         inputAngle *= -1;
     }
