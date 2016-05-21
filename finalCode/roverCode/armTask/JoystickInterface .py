@@ -1,5 +1,6 @@
 from __future__ import division
 from __future__ import print_function
+from inverseKinematics import *
 #one man dp you should check it out;0
 import pygame
 import math
@@ -85,11 +86,13 @@ def redraw_screen(is_adding_joysticks_now):
     textpos.centerx = button.centerx
     textpos.centery = button.centery
     screen.blit(text, (textpos.centerx - textpos.width/2, textpos.centery - textpos.height/2))
+    '''
     logo = pygame.image.load("robotics.jpeg")
     logorect = logo.get_rect()
     logorect.centerx = 575
     logorect.centery = 400
     screen.blit(logo, logorect)
+    '''
     text = font.render('Emergency Stop', 1, TEXTCOLOR)
     textpos = text.get_rect()
     textpos.centerx = stop.centerx
@@ -128,7 +131,7 @@ def connect_joysticks(rect):
         pygame.joystick.init()
         pygame.display.init()
         joynum = pygame.joystick.get_count()
-        print(str(joynum) + " joysticks connected.")
+        # print(str(joynum) + " joysticks connected.")
 
         # Initialize joysticks
         for i in range(joynum):
@@ -150,8 +153,8 @@ def connect_joysticks(rect):
                     joystick.append(pygame.joystick.Joystick(i))
                     pygame.time.wait(500)
 
-        for i in range(joynum):
-            print("Joystick " + str(i) + " is: " + joystick[i].get_name() + " with " + str(joystick[i].get_numaxes()) + " axes.")
+        # for i in range(joynum):
+            # print("Joystick " + str(i) + " is: " + joystick[i].get_name() + " with " + str(joystick[i].get_numaxes()) + " axes.")
 
         return joynum
 
@@ -161,11 +164,12 @@ def connect_joysticks(rect):
 # UDP initialization stuff
 if __name__ == '__main__':
     # UDP
-    print("UDP Port: ", UDP_PORT)
+    # print("UDP Port: ", UDP_PORT)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('0.0.0.0', UDP_PORT))
     sock.settimeout(0.01)
 
+ZeroPosition()
 
 # ------ Main Program Loop -------
 while not done:
@@ -208,21 +212,21 @@ while not done:
         # Process values for the joysticks
         for i in range(0, len(joystick)):
             angle = (joy2value(joystick[i].get_axis(0), True))
-            speed = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
+            arm_forward_back = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
             claw_turn = (joy2value(joystick[i].get_axis(4), True))
-            claw_lift = (joy2value(joystick[i].get_axis(3), True))
-            arm_turn = (joy2value(joystick[i].get_axis(2), True))
+            arm_up_down = (joy2value(joystick[i].get_axis(3), True))
+            arm_left_right= (joy2value(joystick[i].get_axis(2), True))
 
             angle = float256(angle, -1, 1)
-            speed = float256(speed, -1, 1)
-            #claw_turn = float256(claw_turn, -1, 1)
-            #claw_lift = float256(-claw_lift, -1, 1)
-            arm_turn = float256(arm_turn, -1, 1)
-            print("ANGLE: " + str(ord(chr(angle))))
-            print("SPEED: " + str(ord(chr(speed))))
-            print("CLAW is turning: " + str(ord(chr(claw_turn))))
-            print("CLAW is moving: " + str(ord(chr(claw_lift))))
-            print("ARM is turing: " + str(ord(chr(arm_turn))))
+            arm_forward_back = float256(arm_forward_back, -1, 1) - 128
+            claw_turn = float256(claw_turn, -1, 1) - 128
+            arm_up_down = float256(-arm_up_down, -1, 1) - 128
+            arm_left_right = float256(arm_left_right, -1, 1) - 128
+            print("ANGLE: " + str(angle))
+            print("forward_back: " + str(arm_forward_back))
+            print("CLAW is turning: " + str(claw_turn))
+            print("CLAW is moving: " + str(arm_up_down))
+            print("ARM is turing: " + str(arm_left_right))
             # send a 1 if potentiometer is in use (red), 0 if we need to shut off (black)
             pot_flag = 1;
             if POTCOLOR == BLACK:
@@ -235,17 +239,19 @@ while not done:
             # control the direction of the drill if both are pressed do nothing
             # drillclock is given preference while both buttons are pressed
             claw_pinch = 0
-            claw_loose = 0
             if joystick[i].get_button(5) == True:
                 claw_pinch = 1
                 print("claw is grabbing")
             elif joystick[i].get_button(4) == True:
-                claw_loose = 1
-
+                claw_pinch = 1
+            # TODO: get vals from invKinimatics
+            # TODO: send to rover
+            armMotors = getArmVals(arm_forward_back, arm_left_right, arm_up_down, claw_turn, claw_pinch)
+            print(armMotors)
             # send message in form of characters for the potentiometer flag, emergency stop flag, angle, and speed
             message = ''.join([chr(pot_flag), chr(stop_flag), chr(angle), chr(speed)])
-            print(message)
-            print(pot_flag)
+            # print(message)
+            # print(pot_flag)
             #message = ''.join([str(pot_flag), str(stop_flag), str(angle), str(speed)])
             # Send data over UDP, print recv
             sock.sendto(message, (TARGET_IP, UDP_PORT))
