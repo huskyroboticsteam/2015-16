@@ -3,6 +3,8 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #include <Servo.h>
+#include "gps.h"
+#include <SoftwareSerial.h>
 
 EthernetUDP Udp;
 byte MAC_ADDRESS[] = {0x90, 0xA2, 0xDA, 0x00, 0x3D, 0x8B};
@@ -11,7 +13,6 @@ char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
 bool networkStatus = true;
 bool hasIP = false;
 unsigned long timeLastPacket; // to be set to millis() in main code
-
 int inputAngle  = 10;
 int speed  = 128;
 int motorRatio = 1;
@@ -26,35 +27,32 @@ int frontLeftVal = 0;
 int backRightVal = 0;
 int backLeftVal = 0;
 
+int loopCount=0;
 void setup()
 {
     initializeWirelessCommunication();
     initializeSteeringSystem();
     initializeNavigation();
     Serial.begin(9600);
+    Serial.println("started");
 }
 
 void loop()
 {
-    Serial.println(currentAngle);
-  //  Serial.println((unsigned char)packetBuffer[1]);
-    //    Serial.println("hi");
-   // receiveDX6iData();
-    receiveWirelessData();
-    navigationLoop();
-    if ((unsigned char)packetBuffer[1] == 1)
-    {
-        if ((unsigned char)packetBuffer[0] == 1)
-        {
+   receiveWirelessData();
+   getNavigationData();
+   if ((unsigned char)packetBuffer[1] == 1) { // is emergency stop enabled?
+        if ((unsigned char)packetBuffer[0] == 1) { // is potentiometer enabled?
             readCurrentAngle();
             calculateMotorSpeeds();
-        } 
-        else 
-        {
+        }
+        else {
             emergencyCalculateSpeeds();
         }
         writeToMotors();
     }
     timeoutCheck();
 }
+
+
 

@@ -1,3 +1,5 @@
+#include "gps.h"
+
 // MOTOR CONTROL CONSTANTS //
 #define TALON_NEUTRAL_FREQUENCY 1500
 #define MOTOR_1    3 // BACK_RIGHT
@@ -7,8 +9,8 @@
 
 // ETHERNET COMMUNICATION CONSTANTS //
 #define UDP_PORT         8888
-#define DESTINATION_PORT 8888
-#define TIMEOUT          1000
+#define DESTINATION_PORT 8887
+#define TIMEOUT          500
 
 // SERIAL COMMUNICATION CONSTANTS //
 #define BAUD_RATE 9600
@@ -19,3 +21,9 @@
 #define LATERAL_WHEEL_SEPARATION   22.4 // in
 #define MAX_TURN_ANGLE 45 // degrees
 #define TUNING_CONSTANT 1 // constant for error correction
+
+// GPS CONSTANTS //
+#define GPS_RX A3
+#define GPS_TX A2
+#define VALID_POS_TIMEOUT = 2000;
+
