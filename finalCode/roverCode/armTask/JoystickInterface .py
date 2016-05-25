@@ -212,21 +212,37 @@ while not done:
         # Process values for the joysticks
         for i in range(0, len(joystick)):
             angle = (joy2value(joystick[i].get_axis(0), True))
+
+            # this is the arm stuff
             arm_forward_back = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
             claw_turn = (joy2value(joystick[i].get_axis(4), True))
             arm_up_down = (joy2value(joystick[i].get_axis(3), True))
             arm_left_right= (joy2value(joystick[i].get_axis(2), True))
+            claw_pinch = 0
+            if joystick[i].get_button(5) == True:
+                claw_pinch = 1
+                print("claw is grabbing")
+            elif joystick[i].get_button(4) == True:
+                claw_pinch = 1
+            # TODO: get vals from invKinimatics
+            # TODO: send to rover
+            armMotors = getArmVals(arm_forward_back, arm_left_right, arm_up_down, claw_turn, claw_pinch)
+            print(armMotors)
+            # This is the end of the arm stuff
 
             angle = float256(angle, -1, 1)
+            '''
             arm_forward_back = float256(arm_forward_back, -1, 1) - 128
             claw_turn = float256(claw_turn, -1, 1) - 128
             arm_up_down = float256(-arm_up_down, -1, 1) - 128
             arm_left_right = float256(arm_left_right, -1, 1) - 128
+
             print("ANGLE: " + str(angle))
             print("forward_back: " + str(arm_forward_back))
             print("CLAW is turning: " + str(claw_turn))
             print("CLAW is moving: " + str(arm_up_down))
             print("ARM is turing: " + str(arm_left_right))
+            '''
             # send a 1 if potentiometer is in use (red), 0 if we need to shut off (black)
             pot_flag = 1;
             if POTCOLOR == BLACK:
@@ -238,16 +254,7 @@ while not done:
 
             # control the direction of the drill if both are pressed do nothing
             # drillclock is given preference while both buttons are pressed
-            claw_pinch = 0
-            if joystick[i].get_button(5) == True:
-                claw_pinch = 1
-                print("claw is grabbing")
-            elif joystick[i].get_button(4) == True:
-                claw_pinch = 1
-            # TODO: get vals from invKinimatics
-            # TODO: send to rover
-            armMotors = getArmVals(arm_forward_back, arm_left_right, arm_up_down, claw_turn, claw_pinch)
-            print(armMotors)
+
             # send message in form of characters for the potentiometer flag, emergency stop flag, angle, and speed
             message = ''.join([chr(pot_flag), chr(stop_flag), chr(angle), chr(speed)])
             # print(message)
