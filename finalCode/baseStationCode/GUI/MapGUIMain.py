@@ -2,6 +2,7 @@
 import sys
 import pygame
 from pygame.locals import *
+import CameraMovement
 
 # User-created files
 from JoystickConnector import *
@@ -84,6 +85,7 @@ while True:
         # Check keyboard
         if event.type == pygame.KEYDOWN:
             inputKey = event.key
+            CameraMovement.keyPressed(inputKey)
             if (inputKey == pygame.K_f): # Enter fullscreen
                 ScreenDisplay.toggleFullscreen()
             if (inputKey == pygame.K_ESCAPE): # Escape fullscreen, textbox, whatever
@@ -129,7 +131,9 @@ while True:
     AllStopStatus = ScreenDisplay.buttons[0].Status
     PotStopStatus = ScreenDisplay.buttons[1].Status
 
-    JoystickH.sendInput(UDPsender, AllStopStatus, PotStopStatus)
+    messageUDP = JoystickH.addInput(AllStopStatus, PotStopStatus)
+    messageUDP = CameraMovement.addInput(messageUDP)
+    UDPsender.sendItOff(messageUDP)
 
     # UDP receiving stuff
     print UDPreceiver.Coord

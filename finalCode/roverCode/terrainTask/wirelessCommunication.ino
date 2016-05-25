@@ -27,7 +27,7 @@ bool parsePacketData()
     int packetSize = Udp.parsePacket();
     if(packetSize == 4) {
         hasIP = true;
-        Udp.read(packetBuffer, 96);
+        Udp.read(packetBuffer, 22);
         return true;
     }
     return false;

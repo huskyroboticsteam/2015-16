@@ -27,3 +27,5 @@
 #define GPS_TX A2
 #define VALID_POS_TIMEOUT = 2000;
 
+//First two bytes of the packet is the angle, second pair of bytes is the speed, the next 14 bytes are arm controls, the last 4 bytes are for camera movement
+
