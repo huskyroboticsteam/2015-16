@@ -21,6 +21,14 @@ void initializeNavigation()
 {
     gpsSerial.begin(9600);
     gps_setup();
+    pinMode(POTENTIOMETER, INPUT);
+
+    Wire.begin();
+    compass.init();
+    compass.enableDefault();
+
+    compass.m_min = (LSM303::vector<int16_t>){-32767, -32767, -32767};
+    compass.m_max = (LSM303::vector<int16_t>){+32767, +32767, +32767};
 }
 
 void getNavigationData()
@@ -28,7 +36,10 @@ void getNavigationData()
     get_pos();
     if(valid_pos) {
         result[strlen(result)] = ',';
-        //getPotentiometerData();
+        getMagData();
+        if (magDone) {
+            getPotentiometerData();
+        }
         //mark end of result
         result[strlen(result)] = '\0';
         Udp.beginPacket(ipComputer, DESTINATION_PORT);
@@ -65,11 +76,10 @@ void getMagData()
     int one = (int)heading%10;
 
     //put heading in char array and send over udp
-    result[23] = (char)hundred+48;
-    result[24] = (char)ten+48;
-    result[25] = (char)one+48;
+    result[strlen(result)] = (char)hundred+48;
+    result[strlen(result)] = (char)ten+48;
+    result[strlen(result)] = (char)one+48;
 
-    //Serial.println(result);
     magDone = true;
 }
 
@@ -86,11 +96,11 @@ void getPotentiometerData()
     int one = (int)potPos % 10;
     
     //put potentiometer reading in buffer
-    result[26] = ',';
-    result[27] = (char)thousand + 48;
-    result[28] = (char)hundred + 48;
-    result[29] = (char)ten + 48;
-    result[30] = (char)one + 48;
+    result[strlen(result)] = ',';
+    result[strlen(result)] = (char)thousand + 48;
+    result[strlen(result)] = (char)hundred + 48;
+    result[strlen(result)] = (char)ten + 48;
+    result[strlen(result)] = (char)one + 48;
     potDone = true;
 }
 
@@ -102,4 +112,5 @@ void get_pos()
     while (gpsSerial.available()) {
        valid_pos = gps_decode(gpsSerial.read());
     }
+    gpsDone = true;
 }

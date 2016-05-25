@@ -108,6 +108,10 @@ void initializeSteeringSystem()
     frontRight.attach(MOTOR_2);
     frontLeft.attach(MOTOR_3);
     backLeft.attach(MOTOR_4);
+    frontRight.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
+    frontLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
+    backRight.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
+    backLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
 }
 
 void readCurrentAngle()
