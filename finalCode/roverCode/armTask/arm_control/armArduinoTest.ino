@@ -62,7 +62,7 @@ void driveMotor (int mot , int dir , int rawSpeed){
 
 
   switch(mot) {
-    case 1:
+    case 0:
       //b5 (15) , b6 (14) , pwmb56 (5)
       if(dir == 1) {
         dirState |= _BV(13);
@@ -73,18 +73,18 @@ void driveMotor (int mot , int dir , int rawSpeed){
       }
       pwm.setPin(5, driveSpeed, false);
     break;
-    case 2:
+    case 1:
       //a6 (12) , a5 (13) , pwma56 (4)
       if(dir == 1) {
         dirState |= _BV(10);
         dirState &= ~(_BV(11));
       } else if (dir == 0) {
-        dirState &= ~(_BV(12));
+        dirState &= ~(_BV(10));
         dirState |= (_BV(11));
       }
       pwm.setPin(4, driveSpeed, false);
     break;
-    case 3:
+    case 2:
       //b3 (11) , b4 (10) , pwmb34 (3)
       if(dir == 1) {
         dirState |= _BV(9);
@@ -95,7 +95,7 @@ void driveMotor (int mot , int dir , int rawSpeed){
       }
       pwm.setPin(3, driveSpeed, false);     
     break;
-    case 4:
+    case 3:
       //a3 (7) , a4 (6) , pwma34 (2)
       if(dir == 1) {
         dirState |= _BV(7);
@@ -106,7 +106,7 @@ void driveMotor (int mot , int dir , int rawSpeed){
       }
       pwm.setPin(2, driveSpeed, false);
     break;
-    case 5:
+    case 4:
       //b1 (4) , b2 (5) , pwmb12 (1)
       if(dir == 1) {
         dirState |= _BV(4);
@@ -117,7 +117,7 @@ void driveMotor (int mot , int dir , int rawSpeed){
       }
       pwm.setPin(1, driveSpeed, false);
     break;
-    case 6:
+    case 5:
       //a1 (2) , a2 (3) , pwma12 (0)
       if(dir == 1) {
         dirState |= _BV(2);
@@ -128,7 +128,7 @@ void driveMotor (int mot , int dir , int rawSpeed){
       }
       pwm.setPin(0, driveSpeed, false);
     break;
-    case 7:
+    case 6:
       //a7 (17) , a8 (16) , pwma7 (6)
       if(dir == 1) {
         dirState |= _BV(15);
