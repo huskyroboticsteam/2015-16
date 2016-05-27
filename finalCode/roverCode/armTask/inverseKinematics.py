@@ -10,11 +10,6 @@ hand = 0
 humLen = 20
 forarmLen = 15
 handLen = 5
-simpleMode = True
-
-def toggleSimple():
-    global simpleMode
-    simpleMode = (not simpleMode)
 
 def up_down(dx):
     global sholder, wrist
@@ -23,8 +18,6 @@ def up_down(dx):
     if not (inRange(sholder) and inRange(wrist)):
         sholder -= dx
         wrist += dx
-
-
 
 def left_right(dx):
     global sholderRot
@@ -78,14 +71,24 @@ def inRange(x):
 
 # takes in joystick imput values and coverts to motor vals
 # returns a 7-length array of vals
-def getArmVals(arm_forward_back, arm_left_right, arm_up_down, wrist_twist, claw_open_close):
-    if simpleMode:
+def getArmVals(mode, arm_forward_back, arm_left_right, arm_up_down, wrist_twist, claw_open_close, extra_wrist, extra_elbow_rot):
+    if mode == 0:
+        temp = [arm_left_right, arm_forward_back, arm_up_down, extra_elbow_rot, extra_wrist, wrist_twist, claw_open_close]
+        vals = [x * 5 for x in temp]
+        return [sholderRot + vals[0],
+                sholder + vals[1],
+                elbow + vals[2],
+                elbowRot + vals[3],
+                wrist + vals[4],
+                wristRot + vals[5],
+                hand + vals[6]]
+    elif mode == 1:
         forward_back(arm_forward_back * 5)
         up_down(arm_up_down  * 5)
         left_right(arm_left_right * 5)
         twistHand(wrist_twist * 5)
         hand_open_close(claw_open_close * 5)
-    else:
+    elif mode == 2:
         InverseKin()
     return [sholderRot, sholder, elbow, elbowRot, wrist, wristRot, hand]
 
