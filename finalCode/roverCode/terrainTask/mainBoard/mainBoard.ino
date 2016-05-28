@@ -29,12 +29,13 @@ void setup()
 {
     initializeSteeringSystem();
     initializeWirelessCommunication();
+    initializeNavigation();
 }
 
 void loop()
 {
    receiveWirelessData();
-   //getNavigationData();
+   getNavigationData();
    if ((unsigned char)packetBuffer[1] == 1) { // is emergency stop enabled?
         if ((unsigned char)packetBuffer[0] == 1) { // is potentiometer enabled?
             readCurrentAngle();
