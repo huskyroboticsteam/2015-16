@@ -44,7 +44,7 @@ void loop()
             emergencyCalculateSpeeds();
         }
         writeToMotors();
-    }
+    }s
     timeoutCheck();
 }
 
