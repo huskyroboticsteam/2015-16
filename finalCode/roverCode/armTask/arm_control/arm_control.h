@@ -1,4 +1,5 @@
-
+#include <Adafruit_PWMServoDriver.h>
+#include <I2cDiscreteIoExpander.h>
 #ifndef _ARM_CONTROL_
 #define _ARM_CONTROL_
 /*void initArm();

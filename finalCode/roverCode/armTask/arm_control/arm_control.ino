@@ -1,6 +1,6 @@
 #include "arm_control.h"
-#include <math.h>
-
+#include <Adafruit_PWMServoDriver.h>
+#include <I2cDiscreteIoExpander.h>
 #define ARM_PACK_START 4
 #define SHOLDER_ROT 0
 #define SHOLDER 1
@@ -15,84 +15,9 @@ int16_t prevArmPos[7];
 char packetBuffer[18];
 char packetVal = 0;
 
-int absolute(int input) {
-  if (input < 0) {
-    return -input;
-  }
-  return input;
-}
-
-// calculates the arm pos and writes to the motors
-void calculateArmPos() {
-  // parse the packet into the array
-  
-  int16_t nextArmPos[7];
-  for (int i = 0; i < 7; i++) {
-    nextArmPos[i] = packetBuffer[ARM_PACK_START + 2 * i];
-    nextArmPos[i] *= 256;
-    nextArmPos[i] += packetBuffer[ARM_PACK_START + 2 * i + 1];
-  }
-
-  // if the potentiometers gets done prevArmPos will be chnaged here
-  
-  // calculate the difference and write to motors
-  
-  int16_t diffArmPos[7];
-  for (int k = 0; k < 7; k++) {
-    diffArmPos[k] = prevArmPos[k] - nextArmPos[k];
-  }
-  
-  
-  // write to motors
-  // sholder_rot
-  if (diffArmPos[SHOLDER_ROT] < 0) {
-    driveMotor(SHOLDER_ROT, 1, absolute(diffArmPos[SHOLDER_ROT]));
-  } else {
-    driveMotor(SHOLDER_ROT, 0, absolute(diffArmPos[SHOLDER_ROT]));
-  }
-  // sholder
-  if (diffArmPos[SHOLDER] < 0) {
-    driveMotor(SHOLDER, 1, absolute(diffArmPos[SHOLDER]));
-  } else {
-    driveMotor(SHOLDER, 0, absolute(diffArmPos[SHOLDER]));
-  }
-  // elbow
-  if (diffArmPos[ELBOW] < 0) {
-    driveMotor(ELBOW, 1, absolute(diffArmPos[ELBOW]));
-  } else {
-    driveMotor(ELBOW, 0, absolute(diffArmPos[ELBOW]));
-  }
-  // elbow_rot
-  if (diffArmPos[ELBOW_ROT] < 0) {
-    driveMotor(ELBOW_ROT, 1, absolute(diffArmPos[ELBOW_ROT]));
-  } else {
-    driveMotor(ELBOW_ROT, 0, absolute(diffArmPos[ELBOW_ROT]));
-  }
-  // wrist
-  if (diffArmPos[WRIST] < 0) {
-    driveMotor(WRIST, 1, absolute(diffArmPos[WRIST]));
-  } else {
-    driveMotor(WRIST, 0, absolute(diffArmPos[WRIST]));
-  }
-  // wrist_rot
-  if (diffArmPos[WRIST_ROT] < 0) {
-    driveMotor(WRIST_ROT, 1, absolute(diffArmPos[WRIST_ROT]));
-  } else {
-    driveMotor(WRIST_ROT, 0, absolute(diffArmPos[WRIST_ROT]));
-  }
-  // hand
-  if (diffArmPos[HAND] < 0) {
-    driveMotor(HAND, 1, absolute(diffArmPos[HAND]));
-  } else {
-    driveMotor(HAND, 0, absolute(diffArmPos[HAND]));
-  }
-  
-  // replace prev with next
-  for (int j = 0; j < 7; j++) {
-    prevArmPos[j] = nextArmPos[j];
-  }
-  
-}
+void initArm();
+void enableMotors();
+void calculateArmPos();
 
 void setup() {
   // put your setup code here, to run once:
@@ -129,3 +54,5 @@ void loop() {
     packetVal = -50;
   }
   packetVal++;
+
+}
