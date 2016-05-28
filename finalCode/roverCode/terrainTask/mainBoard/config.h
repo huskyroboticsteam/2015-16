@@ -1,5 +1,3 @@
-#include "gps.h"
-
 // MOTOR CONTROL CONSTANTS //
 #define TALON_NEUTRAL_FREQUENCY 1500
 #define MOTOR_1    3 // BACK_RIGHT

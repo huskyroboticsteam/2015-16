@@ -132,7 +132,7 @@ while True:
     PotStopStatus = ScreenDisplay.buttons[1].Status
 
     messageUDP = JoystickH.addInput(AllStopStatus, PotStopStatus)
-    messageUDP = CameraMovement.addInput(messageUDP)
+#    messageUDP = CameraMovement.addInput(messageUDP)
     UDPsender.sendItOff(messageUDP)
 
     # UDP receiving stuff

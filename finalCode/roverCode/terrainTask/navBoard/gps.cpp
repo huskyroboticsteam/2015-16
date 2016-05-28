@@ -1,27 +1,6 @@
-/* trackuino copyright (C) 2010  EA5HAV Javi
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 #include "config.h"
 #include "gps.h"
-#if (ARDUINO + 1) >= 100
-#  include <Arduino.h>
-#else
-#  include <WProgram.h>
-#endif
+#include <Arduino.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -95,6 +74,7 @@ static bool at_checksum = false;
 static unsigned char our_checksum = '$';
 static unsigned char their_checksum = 0;
 static char token[16];
+char result[32];
 static int num_tokens = 0;
 static unsigned int offset = 0;
 static bool active = false;
@@ -146,39 +126,42 @@ void parse_sentence_type(const char *token)
 
 void parse_time(const char *token)
 {
-  // Time can have decimals (fractions of a second), but we only take HHMMSS
-  strncpy(new_time, token, 6);
-  // Terminate string
-  new_time[6] = '\0';
-  
-  new_seconds = 
-    ((new_time[0] - '0') * 10 + (new_time[1] - '0')) * 60 * 60UL +
-    ((new_time[2] - '0') * 10 + (new_time[3] - '0')) * 60 +
-    ((new_time[4] - '0') * 10 + (new_time[5] - '0'));
+    // Time can have decimals (fractions of a second), but we only take HHMMSS
+    strncpy(new_time, token, 6);
+    // Terminate string
+    new_time[6] = '\0';
+    new_seconds = 
+        ((new_time[0] - '0') * 10 + (new_time[1] - '0')) * 60 * 60UL +
+        ((new_time[2] - '0') * 10 + (new_time[3] - '0')) * 60 +
+        ((new_time[4] - '0') * 10 + (new_time[5] - '0'));
 }
 
 void parse_status(const char *token)
 {
-  // "A" = active, "V" = void. We shoud disregard void sentences
-  if (strcmp(token, "A") == 0)
-    active = true;
-  else
-    active = false;
+    // "A" = active, "V" = void. We shoud disregard void sentences
+    if (strcmp(token, "A") == 0)
+        active = true;
+    else
+        active = false;
 }
 
 void parse_lat(const char *token)
 {
-  // Parses latitude in the format "DD" + "MM" (+ ".M{...}M")
-  char degs[3];
-  if (strlen(token) >= 4) {
-    degs[0] = token[0];
-    degs[1] = token[1];
-    degs[2] = '\0';
-    new_lat = atof(degs) + atof(token + 2) / 60;
-  }
-  // APRS-ready latitude
-  strncpy(new_aprs_lat, token, 7);
-  new_aprs_lat[7] = '\0';
+    // Parses latitude in the format "DD" + "MM" (+ ".M{...}M")
+    char degs[3];
+    if (strlen(token) >= 4) {
+        for (int i = 0; i <= 8; i++) {
+            result[i] = token[i];    
+        }
+        result[9] = ',';
+        degs[0] = token[0];
+        degs[1] = token[1];
+        degs[2] = '\0';
+        new_lat = atof(degs) + atof(token + 2) / 60;
+    }
+    // APRS-ready latitude
+    strncpy(new_aprs_lat, token, 7);
+    new_aprs_lat[7] = '\0';
 }
 
 void parse_lat_hemi(const char *token)
@@ -192,8 +175,11 @@ void parse_lat_hemi(const char *token)
 void parse_lon(const char *token)
 {
   // Longitude is in the format "DDD" + "MM" (+ ".M{...}M")
-  char degs[4];
+  char degs[4]; // why is this only 4?????????? 
   if (strlen(token) >= 5) {
+    for (int i = 10; i <= 20; i++) {
+            result[i] = token[i - 10];    
+        }
     degs[0] = token[0];
     degs[1] = token[1];
     degs[2] = token[2];
@@ -233,25 +219,19 @@ void parse_altitude(const char *token)
 // Exported functions
 //
 void gps_setup() {
-  strcpy(gps_time, "000000");
-  strcpy(gps_aprs_lat, "0000.00N");
-  strcpy(gps_aprs_lon, "00000.00E");
+    strcpy(gps_time, "000000");
+    strcpy(gps_aprs_lat, "0000.00N");
+    strcpy(gps_aprs_lon, "00000.00E");
 }
 
 bool gps_decode(char c)
 {
   int ret = false;
-
   switch(c) {
     case '\r':
     case '\n':
       // End of sentence
-
       if (num_tokens && our_checksum == their_checksum) {
-#ifdef DEBUG_GPS
-        Serial.print(" (OK!) ");
-        Serial.print(millis());
-#endif
         // Return a valid position only when we've got two rmc and gga
         // messages with the same timestamp.
         switch (sentence_type) {
@@ -259,7 +239,6 @@ bool gps_decode(char c)
             break;    // Keeps gcc happy
           case SENTENCE_GGA:
             strcpy(gga_time, new_time);
-            break;
           case SENTENCE_RMC:
             strcpy(rmc_time, new_time);
             break;
@@ -299,10 +278,6 @@ bool gps_decode(char c)
           ret = true;
         }
       }
-#ifdef DEBUG_GPS
-      if (num_tokens)
-        Serial.println();
-#endif
       at_checksum = false;        // CR/LF signals the end of the checksum
       our_checksum = '$';         // Reset checksums
       their_checksum = 0;
@@ -340,11 +315,7 @@ bool gps_decode(char c)
       // Prepare for next token
       num_tokens++;
       offset = 0;
-#ifdef DEBUG_GPS
-      Serial.print(c);
-#endif
       break;
-
     default:
       // Any other character
       if (at_checksum) {
@@ -358,10 +329,8 @@ bool gps_decode(char c)
           our_checksum ^= c;
         }
       }
-#ifdef DEBUG_GPS
-      Serial.print(c);
-#endif
   }
   return ret;
 }
+
 

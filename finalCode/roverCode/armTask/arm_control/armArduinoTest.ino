@@ -34,7 +34,8 @@ void disableMotors() {
   direction.digitalWrite(dirState);
 }
 
-void driveMotor(int mot, int dir, int rawSpeed) {
+void driveMotor(int mot, int dir, int rawSpeed)
+{
 
   double driveSpeed = map(rawSpeed, MIN_SPEED, MAX_SPEED, 0, 4096);
 

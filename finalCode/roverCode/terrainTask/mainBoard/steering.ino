@@ -1,5 +1,3 @@
-
-// All Functions for Driving the Motors //
 #include "Arduino.h"
 #include "config.h"
 #include <Ethernet.h>
@@ -28,7 +26,7 @@ void calculateMotorSpeeds()
         speed *= -1;
     }
 
-    // left is positibe and right is negative
+    // left is positive and right is negative
     if(currentAngle <= 140) { // state 1 - going left
         if(inputAngle > 8) { // doesn't want to keep turning left
             frontRightVal = speed;
@@ -100,6 +98,7 @@ void writeToMotors()
         backRight.writeMicroseconds(map(backRightVal, -100, 100, 1000, 2000));
         backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 2000, 1000));
     }
+    Serial.println(backRightVal);
 }
 
 void initializeSteeringSystem()
