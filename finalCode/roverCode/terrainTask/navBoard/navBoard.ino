@@ -17,7 +17,6 @@ void setup()
 {
     initializeWirelessCommunication();
     initializeNavigation();
-    Serial.begin(9600);
 }
 
 void loop()

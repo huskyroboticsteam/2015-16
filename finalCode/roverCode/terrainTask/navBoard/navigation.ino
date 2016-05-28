@@ -11,7 +11,7 @@ char sentence[sentenceSize];
 bool gpsDone = false;
 bool magDone = false;
 bool potDone = false;
-bool valid_pos = false;
+int valid_pos = 0;
 
 void initializeNavigation()
 {
@@ -22,7 +22,7 @@ void initializeNavigation()
 void getNavigationData()
 {
     get_pos();
-    if(valid_pos) {
+    if(valid_pos && strlen(result) > 0) {
         //mark end of result
         result[strlen(result)] = '\0';
         Udp.beginPacket(ipComputer, DESTINATION_PORT);
@@ -34,24 +34,20 @@ void getNavigationData()
 
 void resetData()
 {
-  gpsDone = false;
-  magDone = false;
-  potDone = false;
-  // No idea why doesn't strlen(result) work now.
   for(int i = 0 ; i < 31; i++) {
     result[i] = '\0'; 
   }
   valid_pos = 0;
+  gpsSerial.flush();
 }
-
 
 void get_pos()
 {
+    uint32_t timeout = millis();
     // Get a valid position from the GPS
-    gpsSerial.flush();
-    delay(900);
-    while (gpsSerial.available()) {
-       valid_pos = gps_decode(gpsSerial.read());
-    }
-    gpsDone = true;
+    do {
+        if (gpsSerial.available()) {
+            valid_pos = gps_decode(gpsSerial.read());
+        }
+    } while ( (millis() - timeout < VALID_POS_TIMEOUT) && ! valid_pos) ;
 }
