@@ -7,7 +7,7 @@ void enableMotors();
 
 void disableMotors();
 
-void driveMotor();
+void driveMotor(int mot, int dir, int rawSpeed);
 
 void calculateArmPos();*/
 

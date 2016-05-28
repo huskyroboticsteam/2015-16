@@ -72,16 +72,17 @@ def inRange(x):
 # takes in joystick imput values and coverts to motor vals
 # returns a 7-length array of vals
 def getArmVals(mode, arm_forward_back, arm_left_right, arm_up_down, wrist_twist, claw_open_close, extra_wrist, extra_elbow_rot):
+    global sholderRot, sholder, elbow, elbowRot, wrist, wristRot, hand
     if mode == 0:
         temp = [arm_left_right, arm_forward_back, arm_up_down, extra_elbow_rot, extra_wrist, wrist_twist, claw_open_close]
         vals = [x * 5 for x in temp]
-        return [sholderRot + vals[0],
-                sholder + vals[1],
-                elbow + vals[2],
-                elbowRot + vals[3],
-                wrist + vals[4],
-                wristRot + vals[5],
-                hand + vals[6]]
+        sholderRot = sholderRot + vals[0]
+        sholder = sholder + vals[1]
+        elbow = elbow + vals[2]
+        elbowRot = elbowRot + vals[3]
+        wrist = wrist + vals[4]
+        wristRot = wristRot + vals[5]
+        hand = hand + vals[6]
     elif mode == 1:
         forward_back(arm_forward_back * 5)
         up_down(arm_up_down  * 5)

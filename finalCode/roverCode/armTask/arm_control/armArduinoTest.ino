@@ -1,5 +1,5 @@
 #include "arm_control.h"
-#include <Wire.h>
+// #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <I2cDiscreteIoExpander.h>
 
@@ -13,7 +13,7 @@ uint16_t dirState;
 // maybe use -100 to 100
 #define MIN_SPEED = 0
 #define MAX_SPEED = 100
-
+/*
 void initArm() {
 
   //Set all IO Expander outputs low except standby which is set high (disables Motors)
@@ -23,7 +23,7 @@ void initArm() {
   pwm.begin();
   pwm.setPWMFreq(1000);
 }
-
+*/
 void enableMotors() {
   dirState = 0x00;
   direction.digitalWrite(dirState);
