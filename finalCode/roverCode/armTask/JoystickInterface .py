@@ -214,35 +214,29 @@ while not done:
             angle = (joy2value(joystick[i].get_axis(0), True))
 
             # this is the arm stuff
-            #there are some changes here:
-            arm_forward_back = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
-            claw_turn = (joy2value(joystick[i].get_axis(4), True))
-            arm_up_down = (joy2value(joystick[i].get_axis(3), True))
-            arm_left_right= (joy2value(joystick[i].get_axis(2), True))
-            claw_pinch = 0
-            if joystick[i].get_button(5):
-                claw_pinch = 1
-                print("claw is grabbing")
-            elif joystick[i].get_button(4):
-                claw_pinch = -1
-            for j in range(0, 10):
-                if joystick[i].get_button(j):
-                    print(j)
-            wrist_extra = 0
+            #there are some changes here
+            sholder_joy = (joy2value(joystick[i].get_axis(1), True))
+            sholder_rot_joy = (joy2value(joystick[i].get_axis(0), True))
+            elbow_joy = 0
             if joystick[i].get_button(0):
-                wrist_extra = 1
+                elbow_joy = 1
             elif joystick[i].get_button(1):
-                wrist_extra = -1
-            elbow_extra = 0
-            if joystick[i].get_button(2):
-                elbow_extra = 1
-            elif joystick[i].get_button(3):
-                elbow_extra = -1
+                elbow_joy = -1
+            elbow_rot_joy =  (joy2value(joystick[i].get_axis(3), True))
+            hat_vals = joystick[i].get_hat(0)
+            wrist_joy = hat_vals[1]
+            wrist_rot_joy = hat_vals[0]
+            claw_pinch = 0
+            if joystick[i].get_button(3):
+                claw_pinch = 1
+            elif joystick[i].get_button(2):
+                claw_pinch = -1
+            arm_speed = 1 - (joy2value(joystick[i].get_axis(2), False))
 
             # TODO: get vals from invKinimatics
             # TODO: send to rover
             # added mode and default values Trevor, ask Brian to explain
-            armMotors = getArmVals(0, arm_forward_back, arm_left_right, arm_up_down, claw_turn, claw_pinch, wrist_extra, elbow_extra)
+            armMotors = getArmVals(0, sholder_rot_joy, sholder_joy, elbow_joy, elbow_rot_joy, wrist_joy, wrist_rot_joy, claw_pinch, arm_speed)
             print(armMotors)
             # This is the end of the arm stuff
 
