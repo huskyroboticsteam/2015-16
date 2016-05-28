@@ -96,9 +96,9 @@ void getMagData()
     int one = (int)heading%10;
 
     //put heading in char array and send over udp
-    result[23] = (char)hundred+48;
-    result[24] = (char)ten+48;
-    result[25] = (char)one+48;
+    result[strlen(result)] = (char)hundred+48;
+    result[strlen(result)] = (char)ten+48;
+    result[strlen(result)] = (char)one+48;
 
     //Serial.println(result);
     magDone = true;
@@ -117,11 +117,11 @@ void getPotentiometerData()
     int one = (int)potPos % 10;
     
     //put potentiometer reading in buffer
-    result[26] = ',';
-    result[27] = (char)thousand + 48;
-    result[28] = (char)hundred + 48;
-    result[29] = (char)ten + 48;
-    result[30] = (char)one + 48;
+    result[strlen(result)] = ',';
+    result[strlen(result)] = (char)thousand + 48;
+    result[strlen(result)] = (char)hundred + 48;
+    result[strlen(result)] = (char)ten + 48;
+    result[strlen(result)] = (char)one + 48;
     potDone = true;
 }
 
