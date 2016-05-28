@@ -1,4 +1,4 @@
-#include "arm_control.h"
+ #include "arm_control.h"
 #include <Adafruit_PWMServoDriver.h>
 #include <I2cDiscreteIoExpander.h>
 #define ARM_PACK_START 4
@@ -21,8 +21,20 @@ void calculateArmPos();
 
 void setup() {
   // put your setup code here, to run once:
+  Serial.begin(9600);
+  //Serial.println("1");
+  delay(100);
+  //Serial.println("2");
   initArm();
+  //Serial.println("3");
+  delay(100);
+  //Serial.println("4");
   enableMotors();
+  //Serial.println("5");
+  delay(100);
+  //Serial.println("6");
+  
+  
   prevArmPos[0] = 0;
   prevArmPos[1] = 0;
   prevArmPos[2] = 0;
@@ -34,7 +46,8 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  calculateArmPos();
+  // calculateArmPos();
+  /*
   packetBuffer[4] = packetVal;
   packetBuffer[5] = packetVal;
   packetBuffer[6] = packetVal;
@@ -54,5 +67,48 @@ void loop() {
     packetVal = -50;
   }
   packetVal++;
+  */
+  
+  driveMotor(7, 1, 10);
+  driveMotor(1, 1, 10);
+  driveMotor(2, 1, 10);
+  driveMotor(3, 1, 10);
+  driveMotor(4, 1, 10);
+  driveMotor(5, 1, 10);
+  driveMotor(6, 1, 10);
+        
+  delay(1000);
+  stopMotor(1);
+  stopMotor(2);
+  stopMotor(3);
+  stopMotor(4);
+  stopMotor(5);
+  stopMotor(6);
+  stopMotor(7);
 
+  delay(1000);
+  driveMotor(7, 0, 20);
+  driveMotor(1, 0, 20);
+  driveMotor(2, 0, 20);
+  driveMotor(3, 0, 20);
+  driveMotor(4, 0, 20);
+  driveMotor(5, 0, 20);
+  driveMotor(6, 0, 20);
+        
+  delay(1000);
+  stopMotor(1);
+  stopMotor(2);
+  stopMotor(3);
+  stopMotor(4);
+  stopMotor(5);
+  stopMotor(6);
+  stopMotor(7);
+        
+  delay(1000);
+  
+  /*
+  driveMotor(2, 0, 20);
+  delay(1000);
+  */
+  
 }
