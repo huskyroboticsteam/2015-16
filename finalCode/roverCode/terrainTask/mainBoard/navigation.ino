@@ -15,7 +15,7 @@ char result[32];
 
 void initializeNavigation()
 {
-    pinMode(A6, INPUT);
+    pinMode(POTENTIOMETER, INPUT);
 
     Wire.begin();
     compass.init();
@@ -30,13 +30,15 @@ void getNavigationData()
     getMagData();
     if (magDone) {
         getPotentiometerData();
+        if (strlen(result) > 0) {
+            result[strlen(result)] = '\0';
+            Udp.beginPacket(ipComputer, DESTINATION_PORT);
+            Udp.write(result);
+            Udp.endPacket();
+            resetData();
+        }
     }
     //mark end of result
-    result[strlen(result)] = '\0';
-    Udp.beginPacket(ipComputer, DESTINATION_PORT);
-    Udp.write(result);
-    Udp.endPacket();
-    resetData();
 }
 
 void resetData()

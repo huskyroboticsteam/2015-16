@@ -6,7 +6,7 @@
 #include <SoftwareSerial.h>
 
 EthernetUDP Udp;
-byte MAC_ADDRESS[] = {0x90, 0xA2, 0xDA, 0x00, 0x3D, 0x8B};
+byte MAC_ADDRESS[] = {0x90, 0xA2, 0xDA, 0x0D, 0x89, 0x99};
 IPAddress IP(192, 168, 1, 52);
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
 bool networkStatus = true;

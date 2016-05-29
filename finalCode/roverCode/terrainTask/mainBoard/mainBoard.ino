@@ -27,8 +27,8 @@ int backLeftVal = 0;
 
 void setup()
 {
-    initializeSteeringSystem();
     initializeWirelessCommunication();
+    initializeSteeringSystem();
     initializeNavigation();
 }
 
@@ -45,9 +45,6 @@ void loop()
             emergencyCalculateSpeeds();
         }
         writeToMotors();
-    }s
+    }
     timeoutCheck();
 }
-
-
-

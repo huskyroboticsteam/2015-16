@@ -40,7 +40,6 @@ void timeoutCheck()
         frontLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
         backRight.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
         backLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
-        Serial.println("TIMEOUT!!!");
-        }
+    }
 }
 
