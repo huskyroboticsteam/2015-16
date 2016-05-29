@@ -64,6 +64,16 @@ def joy2value(value, half_control=False):
         value = 0
     return value
 
+#needed for the arm stuff
+def arm_joy2value(value):
+    if value > .2:
+        return 1
+    elif value < -.2:
+        return -1
+    else:
+        return 0
+
+
 # Maps values to range from 0 to 255
 def float256(value, low, high):
     value = 256 * (value - low) / (high - low)
@@ -215,14 +225,14 @@ while not done:
 
             # this is the arm stuff
             #there are some changes here
-            sholder_joy = (joy2value(joystick[i].get_axis(1), True))
-            sholder_rot_joy = (joy2value(joystick[i].get_axis(0), True))
+            sholder_joy = arm_joy2value(joystick[i].get_axis(1))
+            sholder_rot_joy = arm_joy2value(joystick[i].get_axis(0))
             elbow_joy = 0
             if joystick[i].get_button(0):
                 elbow_joy = 1
             elif joystick[i].get_button(1):
                 elbow_joy = -1
-            elbow_rot_joy =  (joy2value(joystick[i].get_axis(3), True))
+            elbow_rot_joy =  arm_joy2value(joystick[i].get_axis(3))
             hat_vals = joystick[i].get_hat(0)
             wrist_joy = hat_vals[1]
             wrist_rot_joy = hat_vals[0]
@@ -231,7 +241,7 @@ while not done:
                 claw_pinch = 1
             elif joystick[i].get_button(2):
                 claw_pinch = -1
-            arm_speed = 1 - (joy2value(joystick[i].get_axis(2), False))
+            arm_speed = 1 - joy2value(joystick[i].get_axis(2), False)
 
             # TODO: get vals from invKinimatics
             # TODO: send to rover
