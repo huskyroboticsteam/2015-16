@@ -2,7 +2,6 @@
 import sys
 import pygame
 from pygame.locals import *
-import CameraMovement
 
 # User-created files
 from JoystickConnector import *
@@ -11,8 +10,8 @@ from sendOverUDP import *
 from receiveOverUDP import *
 
 # Initial screen parameters
-screenWidth = 3200
-screenHeight = 1800
+screenWidth = 1600
+screenHeight = 900
 
 roverAngle = 0
 
@@ -44,6 +43,9 @@ previousMouseStatus = False
 UDPreceiver.start()
 MESSAGE = " "
 RECEIVERTHREADLOCK = threading.Lock()
+
+#DEBUG:
+Magnetometer = 0
 
 # MAIN LOOP
 while True:
@@ -79,17 +81,17 @@ while True:
 
         # Check mouse
         if event.type == pygame.MOUSEBUTTONDOWN:
+            print "yes"
             clickPosition = pygame.mouse.get_pos() # Find position of a mouse click
             ScreenDisplay.clickCheck(clickPosition)
 
         # Check keyboard
         if event.type == pygame.KEYDOWN:
             inputKey = event.key
-            CameraMovement.keyPressed(inputKey)
             if (inputKey == pygame.K_f): # Enter fullscreen
                 ScreenDisplay.toggleFullscreen()
             if (inputKey == pygame.K_ESCAPE): # Escape fullscreen, textbox, whatever
-                if ScreenDisplay.InputTextbox.status == True:
+                if ScreenDisplay.InputTextbox.status != 0:
                     ScreenDisplay.InputTextbox.disable()
                 else:
                     ScreenDisplay.escapeFullscreen()
@@ -105,22 +107,35 @@ while True:
                 ScreenDisplay.InputTextbox.currentString = ScreenDisplay.InputTextbox.currentString[0:-1]
             if (inputKey == pygame.K_RETURN):
                 ScreenDisplay.getEntry()
+            if (inputKey == pygame.K_DELETE) or (inputKey == pygame.K_BACKSPACE):
+                ScreenDisplay.deleteMarker()
 
             # TESTING INPUT
             if (inputKey == pygame.K_y):
                 roverAngle += 10
                 ScreenDisplay.RoverGraphic.rotateImage(pygame, roverAngle)
+            if (inputKey == pygame.K_u):
+                Magnetometer += 10
+                ScreenDisplay.RoverPositionMarker.rotateImage(pygame, Magnetometer)
 
             #TODO: Input handling class
-            if inputKey == 56 and (pygame.key.get_mods() and KMOD_SHIFT): # If asterisk pressed
-                validKeyIn = True
-                inputKey = 42
-            elif (inputKey >= 48 and inputKey <= 57) or inputKey == 44 or inputKey == 46: # If key pressed is in the ASCII number range, or is a comma or period
-                validKeyIn = True
-            elif inputKey == 44 or inputKey == 46:
-                validKeyIn = True
-            elif inputKey == K_MINUS:
-                validKeyIn = True
+            if ScreenDisplay.InputTextbox.status == 1:
+                if inputKey == 56 and (pygame.key.get_mods() and KMOD_SHIFT): # If asterisk pressed
+                    validKeyIn = True
+                    inputKey = 42
+                elif (inputKey >= 48 and inputKey <= 57) or inputKey == 44 or inputKey == 46: # If key pressed is in the ASCII number range, or is a comma or period
+                    validKeyIn = True
+                elif inputKey == 44 or inputKey == 46:
+                    validKeyIn = True
+                elif inputKey == K_MINUS:
+                    validKeyIn = True
+                else:
+                    validKeyIn = False
+            elif ScreenDisplay.InputTextbox.status == 2:
+                if (inputKey >= 48 and inputKey <= 57):
+                    validKeyIn = True
+                else:
+                    validKeyIn = False
             else:
                 validKeyIn = False
 
@@ -131,14 +146,14 @@ while True:
     AllStopStatus = ScreenDisplay.buttons[0].Status
     PotStopStatus = ScreenDisplay.buttons[1].Status
 
-    messageUDP = JoystickH.addInput(AllStopStatus, PotStopStatus)
-#    messageUDP = CameraMovement.addInput(messageUDP)
-    UDPsender.sendItOff(messageUDP)
+    JoystickH.sendInput(UDPsender, AllStopStatus, PotStopStatus)
 
     # UDP receiving stuff
-    print UDPreceiver.Coord
-    ScreenDisplay.giveReceivedInformation(UDPreceiver.Coord)
+    # print UDPreceiver.Coord
+    # DEBUG
+    # print UDPreceiver.addr
 
+    ScreenDisplay.giveReceivedInformation(UDPreceiver.Coord,UDPreceiver.Magnetometer)
 
     # DRAW EVERYTHING TO SCREEN
     ScreenDisplay.display()

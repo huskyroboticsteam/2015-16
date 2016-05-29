@@ -40,7 +40,7 @@ class JoystickHandler:
             self.Angle = self.float256(angle, -1, 1)
             self.Speed = self.float256(speed, -1, 1)
 
-    def addInput(self,AllStopStatus,PotStopStatus):
+    def sendInput(self,UDPSender,AllStopStatus,PotStopStatus):
         if AllStopStatus == True:
             allStopSend = chr(0)
         else:
@@ -51,7 +51,7 @@ class JoystickHandler:
             potStopSend = chr(1)
         # send message in form of characters for the potentiometer flag, emergency stop flag, angle, and speed
         messageUDP = ''.join([potStopSend, allStopSend, chr(self.Angle), chr(self.Speed)]) #str originally instead of chr ? Also replace zeroes with bytes as above TODO: ADD BUTTON FUNCTIONALITY
-        return messageUDP;
+        UDPSender.sendItOff(messageUDP)
 
     # Processes the joystick values. Doubles if button for extra thrust is down, rounds values below 0.5 to 0
     def joy2value(self, value, half_control=False):
