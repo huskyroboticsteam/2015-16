@@ -7,6 +7,8 @@ import scipy.signal
 
 energy_kev = []
 counts = []
+sigma = []
+background_noise = []
 peak_bounds = []
 
 # State variables used to keep track of what peak the user
@@ -21,7 +23,6 @@ curr_right_bound = -1
 # emission energy levels in keV and the counts of each energy level,
 # respectively.
 def load_xrf_data(filename):
-    print(filename)
     csv_file = open(filename, 'r')
     file_reader = csv.reader(csv_file)
     next(file_reader)
@@ -33,6 +34,8 @@ def load_xrf_data(filename):
     for row in file_reader:
         energy_kev.append(float(row[0]))
         counts.append(int(row[1]))
+        sigma.append(float(row[2]))
+        background_noise.append(float(row[3]))
         
     energy_kev = numpy.array(energy_kev)
     counts = numpy.array(counts)
@@ -57,12 +60,13 @@ def nearest_minimum(energy):
     
 def get_peak_properties(peak_left, peak_right):
     global counts
+    global background_noise
     
     peak_center = (peak_left + peak_right) / 2
     peak_max = peak_left
     peak_area = 0
     for channel in range(peak_left, peak_right + 1):
-        peak_area += counts[channel]
+        peak_area += (counts[channel] - background_noise[channel])
         if counts[channel] > counts[peak_max]:
             peak_max = channel
             
@@ -88,8 +92,6 @@ def onclick(event):
             xray_left_bound = idx
             print('Selected left bound of source peak with energy %f keV, %d counts' % (kev, counts))
             current_state = 'XRAY_SOURCE_RIGHT_BOUND'
-            # pyplot.plot([kev, 0], [kev, 1000], 'k-', lw=2)
-            # pyplot.show()
             print('Select right bound of source peak')
         
         elif current_state == 'XRAY_SOURCE_RIGHT_BOUND':
@@ -152,7 +154,7 @@ def main():
     print('\nSelected peaks:')
     for peak_left, peak_right in peak_bounds:
         area, center, pmax = get_peak_properties(peak_left, peak_right)
-        print('Peak centered around %f keV with area %d counts and source:area ratio of %f' % \
+        print('Peak centered around %f keV with area %f counts and source:area ratio of %f' % \
               (energy_kev[center], area, area / source_area))
 
 if __name__ == '__main__':
