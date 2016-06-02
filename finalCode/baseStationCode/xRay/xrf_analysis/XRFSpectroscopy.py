@@ -4,6 +4,7 @@ import math
 import numpy
 import matplotlib.pyplot as pyplot
 import scipy.signal
+from XRFDataTable import XRFDataTable
 
 energy_kev = []
 counts = []
@@ -128,11 +129,23 @@ def onclick(event):
             else:
                 current_state = 'PROMPT_DONE'
                 pyplot.close()
-                
+
+def search_by_emission_level(table, emission_level):
+    results = table.lookup(emission_level)
+    if results is None:
+        print('   No potential matches for peak found.')
+    else:
+        print('   Possible element matches for peak:')
+        for entry, error in results:
+            print("Element Name: %s (Atomic # %d)    Emission level (keV): %f    Shell Type: %s    Error: %f" % \
+                    (entry.elem_name, entry.atomic_number, entry.emission_level, entry.shell, error))
+
 def main():
     global current_state
     global xray_left_bound
     global xray_right_bound
+    xrf_table = XRFDataTable('EmissionsTableFiltered.csv')
+    
     counts_smoothed = scipy.signal.savgol_filter(counts, 11, 3)
 
     fig = pyplot.figure()
@@ -150,12 +163,15 @@ def main():
     source_area, source_center, source_max = get_peak_properties(xray_left_bound, xray_right_bound)
     print('\nSource peak: Centered around %f keV with area %d counts' % (energy_kev[source_center], source_area))
     
-    
+    peak_num = 1
+    # search_by_emission_level(xrf_table, energy_kev[source_center])
     print('\nSelected peaks:')
     for peak_left, peak_right in peak_bounds:
         area, center, pmax = get_peak_properties(peak_left, peak_right)
-        print('Peak centered around %f keV with area %f counts and source:area ratio of %f' % \
-              (energy_kev[center], area, area / source_area))
+        print('%d. Peak centered around %f keV with area %f counts and source:area ratio of %f' % \
+              (peak_num, energy_kev[pmax], area, area / source_area))
+        search_by_emission_level(xrf_table, energy_kev[center])
+        peak_num += 1
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:

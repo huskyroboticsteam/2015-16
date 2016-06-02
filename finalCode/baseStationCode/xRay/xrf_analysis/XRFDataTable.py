@@ -30,11 +30,12 @@ class XRFDataTable:
     
     # Lookup helper using approximate binary search method with parameterized threshold
     def __lookup(self, emission_energy, start, end, threshold):
-        if start > end:
+        if end - 1 <= start:
             return None
         else:
             mid = int((start + end) / 2)
             cur_energy = self.emission_level_sorted[mid]
+            # print('Comparing %f to %f with threshold %f' % (cur_energy, emission_energy, threshold))
             if abs(cur_energy - emission_energy) <= threshold:
                 # Found match. Return all matches that are within the threshold, sorted by error
                 # ascending.
@@ -61,25 +62,33 @@ class XRFDataTable:
                 # are "found" multiple times
                 return sorted(list(set(matches)), key = lambda result: result[1])
             elif cur_energy < emission_energy:
-                return self.__lookup(emission_energy, mid, end, threshold)
+                try:
+                    return self.__lookup(emission_energy, mid + 1, end, threshold)
+                except RecursionError as e:
+                    print('Overflow')
+                    exit(1)
             else:
-                return self.__lookup(emission_energy, start, mid - 1, threshold)
+                try:
+                    return self.__lookup(emission_energy, start, mid, threshold)
+                except RecursionError as e:
+                    print('Overflow')
+                    exit(1)
                     
     # Lookup emission entries that approximately match
     # the target emission_energy. Returns all matches within the threshold,
     # sorted by closest match to farthest match.
     def lookup(self, emission_energy):
-        result = self.__lookup(emission_energy, 0, len(self.emission_level_sorted), self.__LOOKUP_THRESHOLD_START)
+        result = self.__lookup(emission_energy, 0, len(self.emission_level_sorted) - 1, self.__LOOKUP_THRESHOLD_START)
         if result is None:
-            return self.__lookup(emission_energy, 0, len(self.emission_level_sorted), self.__LOOKUP_THRESHOLD_START * 2)
+            return self.__lookup(emission_energy, 0, len(self.emission_level_sorted) - 1, self.__LOOKUP_THRESHOLD_START * 3)
         else:
             return result
         
-if __name__ == '__main__':
-    table = XRFDataTable('EmissionsTableFiltered.csv')
-    results = table.lookup(0.512)
+# if __name__ == '__main__':
+#     table = XRFDataTable('EmissionsTableFiltered.csv')
+#     results = table.lookup(0.512)
     
-    print('Results of lookup for emission level 0.5113 keV:')
-    for entry, error in results:
-        print("Element Name: %s (Atomic # %d)    Emission level (keV): %f    Shell Type: %s    Error: %f" % \
-                (entry.elem_name, entry.atomic_number, entry.emission_level, entry.shell, error))
+#     print('Results of lookup for emission level 0.5113 keV:')
+#     for entry, error in results:
+#         print("Element Name: %s (Atomic # %d)    Emission level (keV): %f    Shell Type: %s    Error: %f" % \
+#                 (entry.elem_name, entry.atomic_number, entry.emission_level, entry.shell, error))
