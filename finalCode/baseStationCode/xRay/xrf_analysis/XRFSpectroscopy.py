@@ -6,6 +6,9 @@ import matplotlib.pyplot as pyplot
 import scipy.signal
 from XRFDataTable import XRFDataTable
 
+calibration_line_b = -0.282
+calibration_line_m = 2.4097
+
 energy_kev = []
 counts = []
 sigma = []
@@ -137,7 +140,7 @@ def search_by_emission_level(table, emission_level):
     else:
         print('   Possible element matches for peak:')
         for entry, error in results:
-            print("Element Name: %s (Atomic # %d)    Emission level (keV): %f    Shell Type: %s    Error: %f" % \
+            print('      Element Name: %s (Atomic # %d)    Emission level (keV): %f    Shell Type: %s    Error: %f' % \
                     (entry.elem_name, entry.atomic_number, entry.emission_level, entry.shell, error))
 
 def main():
@@ -168,8 +171,10 @@ def main():
     print('\nSelected peaks:')
     for peak_left, peak_right in peak_bounds:
         area, center, pmax = get_peak_properties(peak_left, peak_right)
+        area_ratio = area / source_area
         print('%d. Peak centered around %f keV with area %f counts and source:area ratio of %f' % \
-              (peak_num, energy_kev[pmax], area, area / source_area))
+              (peak_num, energy_kev[pmax], area, area_ratio))
+        print('   %% Abundance of material: %f' % (calibration_line_m * area_ratio + calibration_line_b))
         search_by_emission_level(xrf_table, energy_kev[center])
         peak_num += 1
 
