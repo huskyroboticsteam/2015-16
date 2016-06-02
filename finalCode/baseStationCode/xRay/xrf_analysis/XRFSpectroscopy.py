@@ -6,8 +6,8 @@ import matplotlib.pyplot as pyplot
 import scipy.signal
 from XRFDataTable import XRFDataTable
 
-calibration_line_b = -0.282
-calibration_line_m = 2.4097
+CALIBRATION_LINE_INTERCEPT = -0.282
+CALIBRATION_LINE_SLOPE = 2.4097
 
 energy_kev = []
 counts = []
@@ -174,7 +174,7 @@ def main():
         area_ratio = area / source_area
         print('%d. Peak centered around %f keV with area %f counts and source:area ratio of %f' % \
               (peak_num, energy_kev[pmax], area, area_ratio))
-        print('   %% Abundance of material: %f' % (calibration_line_m * area_ratio + calibration_line_b))
+        print('   %% Abundance of material: %f' % (CALIBRATION_LINE_SLOPE * area_ratio + CALIBRATION_LINE_INTERCEPT))
         search_by_emission_level(xrf_table, energy_kev[center])
         peak_num += 1
 
