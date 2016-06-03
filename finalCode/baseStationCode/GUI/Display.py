@@ -42,9 +42,9 @@ class DisplayInterface(DisplayScreen):
         DisplayScreen.__init__(self, pygame, screenWidth, screenHeight)
 
         # Define maps.
-        startingCoord = (47.656874,-122.312135) # Point more than 1km away from the URC site: (38.420358,-110.809686)
-        ArraySize = [(4,4),(7,7),(11,11),(22,22),(16,21)] # Size of 640x640 tile array for each zoom level separated by commas.
-        locationName = "UW"
+        startingCoord = (38.300585, -111.404652) # Point more than 1km away from the URC site: (38.420358,-110.809686) For UW: (47.656874,-122.312135) For Hotel: (38.300585, -111.404652)
+        ArraySize = [(4,4),(4,4),(4,4),(8,8),(4,4)] # Size of 640x640 tile array for each zoom level separated by commas.
+        locationName = "Hotel" #UW, Mars, and Hotel are the options
         self.zoomLevels = [17,18,19,20,21]  # zoom levels to make displayable on map. Google does not go higher than 21 in Utah.
         self.MapArray = []
 
@@ -61,13 +61,14 @@ class DisplayInterface(DisplayScreen):
 
         # Load other generic images
         self.Ball = pygame.image.load("ballcrosshair.png") # 50x50 pixel image
-        self.RoverBall = pygame.image.load("ballcrosshairBlue.png")
-        self.ScaleIndicatorImage = pygame.image.load("ScaleIndicator320.png")
-        self.RoverFrontImage = pygame.image.load("RoverFront.png")
-        self.RoverBackImage = pygame.image.load("RoverBack.png")
+        self.RoverBall = pygame.image.load("RoverIcon.png")
+        self.ScaleIndicatorImage = pygame.image.load("ScaleIndicator160.png")
+        self.RoverFrontImage = pygame.image.load("RoverFront175.png")
+        self.RoverBackImage = pygame.image.load("RoverBack175.png")
 
         # Create other objects
         self.SidebarRect = Sidebar(self.pygame,self.screenHeight)
+        self.MarkerTextArea = TextArea((25, 400, 150, 100))
         self.createButtons()
         self.InputTextbox = Textbox()
         self.RoverPositionMarker = RoverPosition(self.RoverBall)
@@ -91,7 +92,7 @@ class DisplayInterface(DisplayScreen):
             print str(numSaves) + " image tiles cached from the Internet."
 
         # Change the scale based on current map
-        self.ScaleIndicatorLine = ScaleIndicator(self.pygame, self.MapArray[self.currentMap].borderDistanceKM/2) # ScaleIndicator image is 320 pixels in length, so take the 640-pixel distance and divide it by 2.
+        self.ScaleIndicatorLine = ScaleIndicator(self.pygame, self.MapArray[self.currentMap].borderDistanceKM/4) # ScaleIndicator image is 160 pixels in length, so take the 640-pixel distance and divide it by 4.
         return mapTiles
 
     def createButtons(self): # Button(pygame, Xoffset, Yoffset, alignment, widthRatio, heightRatio, screenWidth, screenHeight, staticText, toggleTextFalse, toggleTextTrue, startingStatus = False):
@@ -103,6 +104,12 @@ class DisplayInterface(DisplayScreen):
     def createMarker(self, coord):
         self.markerList.append(Marker(coord,self.MapArray[self.currentMap]))
 
+    def deleteMarker(self):
+        for i in range(len(self.markerList)):
+            if self.markerList[i] != False:
+                if self.markerList[i].Selected == True:
+                    self.markerList[i] = False
+
     def display(self):
         self.clock.tick(self.fps)
         self.screen.fill(colors.BLACK) # Start with black background
@@ -113,7 +120,8 @@ class DisplayInterface(DisplayScreen):
                 self.displaymap(self.MapTiles[n][m].image,self.MapTiles[n][m].screenlocation)
 
         for i in range(len(self.markerList)): # Display all markers
-            self.markerList[i].display(self.pygame,self.screen,self.Ball,self.MainAxis)
+            if self.markerList[i] != False:
+                self.markerList[i].display(self.pygame,self.screen,self.Ball,self.MainAxis)
 
         # Display rover position
         if self.PixelLocation != False:
@@ -133,6 +141,9 @@ class DisplayInterface(DisplayScreen):
         # Display the input textbox
         self.InputTextbox.display(self.pygame,self.screen,self.pygame.font.Font(None,18))
 
+        # Display the box list of points
+        self.MarkerTextArea.display(self.screen)
+
         # Display the scale indicator
         self.ScaleIndicatorLine.display(self.screen,self.ScaleIndicatorImage)
 
@@ -143,7 +154,10 @@ class DisplayInterface(DisplayScreen):
         if self.EmergencyButtonsEnabled:
             for i in range(len(self.buttons)):
                 self.buttons[i].clicked(position)
-        #TODO: send in UDP sending class, make it send button signals to rover
+
+        for i in range(len(self.markerList)):
+            if self.markerList[i] != False:
+                self.markerList[i].clicked(position)
 
     def getEntry(self):
         inputTextboxOut = self.InputTextbox.returnString()
@@ -152,6 +166,7 @@ class DisplayInterface(DisplayScreen):
                 print "invalid entry"
             else:
                 self.createMarker(inputTextboxOut[0])
+                self.MarkerTextArea.addTextInstance(pygame.font.Font(None,18),str(inputTextboxOut[0].latitude) + " " + str(inputTextboxOut[0].longitude))
         elif inputTextboxOut[1] == 2:
             dimensions = inputTextboxOut[0].split(',')
             if float(dimensions[0]) >= 500 and float(dimensions[0]) <= 4000 and float(dimensions[1]) >= 500 and float(dimensions[1]) <= 4000: # Sanity check: make sure window resize won't be anything crazy
@@ -159,8 +174,15 @@ class DisplayInterface(DisplayScreen):
             else:
                 print "invalid entry"
 
-    def giveReceivedInformation(self,Coordinate):
+    def giveReceivedInformation(self,Coordinate,Magnetometer):
         self.PixelLocation = MapPixelCoords.coordToPixel1(float(Coordinate[0]),float(Coordinate[1]),self.MapArray[self.currentMap])
+        print Magnetometer
+        MagnetometerNumber = float(Magnetometer) - 180
+        if MagnetometerNumber < 0:
+            MagnetometerNumber = MagnetometerNumber + 360
+        print MagnetometerNumber
+        MagneticCorrection = -15.93333 # -15.93333 in Seattle, -10.81 in Hanksville
+        self.RoverPositionMarker.rotateImage(self.pygame,-MagnetometerNumber+MagneticCorrection)
 
     def displaymap(self,object,location):
         self.screen.blit(object, (self.MainAxis.x + location[0], self.MainAxis.y + location[1]))
@@ -182,7 +204,8 @@ class DisplayInterface(DisplayScreen):
             self.MapTiles = self.loadImages(self.MapArray[self.currentMap])
             # Update marker position
             for i in range(len(self.markerList)):
-                self.markerList[i].updateZoom(self.MapArray[self.currentMap])
+                if self.markerList[i] != False:
+                    self.markerList[i].updateZoom(self.MapArray[self.currentMap])
             # Update screen position
             newPixelCoord = MapPixelCoords.coordToPixel1(mapPoint[0],mapPoint[1],self.MapArray[self.currentMap])
             self.MainAxis.x = -(newPixelCoord[0] - self.screenWidth/2)

@@ -47,8 +47,8 @@ class Map:
         self.URcoord = (self.ULcoord[0], self.ULcoord[1] + self.dimensions[1]*self.borderDistance[1])
         self.LLcoord = (self.ULcoord[0] - self.dimensions[0]*self.borderDistance[0], self.ULcoord[1])
         self.LRcoord = (self.ULcoord[0] - self.dimensions[0]*self.borderDistance[0],self.ULcoord[1] + self.dimensions[1]*self.borderDistance[1])
-        self.PixelWidth = self.dimensions[0]*640
-        self.PixelHeight = self.dimensions[1]*640
+        self.PixelWidth = self.dimensions[1]*640
+        self.PixelHeight = self.dimensions[0]*640
 
 class MapTile: # Contains information for each tile
     def __init__(self, mapName, coordinates, zoom, pixelsize, screenlocation, pygame):

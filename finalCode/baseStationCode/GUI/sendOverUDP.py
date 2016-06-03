@@ -10,5 +10,5 @@ class sendOverUDP:
         #self.sockBalls.settimeout(0.01)
 
     def sendItOff(self, messageUDP):
-        print str(messageUDP)
+        #print str(messageUDP)
         self.sockBalls.sendto(messageUDP, (self.TargetIP, self.UDPPort))
