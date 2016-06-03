@@ -4,12 +4,13 @@
 // #define BACK_RIGHT_MOTOR_PIN
 // #define BACK_LEFT_MOTOR_PIN
 #define TALON_NEUTRAL_FREQUENCY 1500
-#define MOTOR_1    3 // FRONT_LEFT
-#define MOTOR_2    5 // FRONT_RIGHT
-#define MOTOR_3    6 // BACK_LEFT
-#define MOTOR_4    9 // BACK_RIGHT
-#define motor_5    8 // augar
-#define motor_6    10 // drill
+//#define MOTOR_1    3 // FRONT_LEFT
+//#define MOTOR_2    5 // FRONT_RIGHT
+//#define MOTOR_3    6 // BACK_LEFT
+//#define MOTOR_4    11 // BACK_RIGHT
+#define MOTOR_5    9// augar
+#define MOTOR_6    6 // drill
+#define SOIL_SENSOR A0 //humidity sensor
 
 // ETHERNET COMMUNICATION CONSTANTS //
 #define UDP_PORT         8888
