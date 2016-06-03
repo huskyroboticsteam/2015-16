@@ -1,12 +1,6 @@
 #include "arm_control.h"
 #include <Wire.h>
-#include <Adafruit_PWMServoDriver.h>
-#include <I2cDiscreteIoExpander.h>
 
-I2cDiscreteIoExpander direction(0x26);
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x5F);
-
-uint16_t dirState;
 
 // play around with these values to find the best
 // maybe use -100 to 100
@@ -16,124 +10,56 @@ uint16_t dirState;
 
 
 void initArm() {
-
-	//Set all IO Expander outputs low except standby which is set high (disables Motors)
-	dirState = 0xFD;
-	direction.digitalWrite(dirState);
-
-	pwm.begin();
-	pwm.setPWMFreq(1000);
-	
-	/*#ifdef TWBR
-		uint8_t twbrbackup = TWBR;
-		TWBR = 12;
-	#endif*/
-	
-	
+  //Serial.println("initArm");
+  sholder_rot.attach(SHOLDER_ROT);
+  sholder.attach(SHOLDER);
+  elbow.attach(ELBOW); 
+  elbow_rot.attach(ELBOW_ROT);
+  wrist.attach(WRIST);
+  wrist_rot.attach(WRIST_ROT);
+  hand.attach(HAND);
+  stopMotor(sholder_rot);
+  stopMotor(sholder);
+  stopMotor(elbow);
+  stopMotor(elbow_rot);
+  stopMotor(wrist);
+  stopMotor(wrist_rot);
+  stopMotor(hand);/*
+  prevArmPos[0] = 0;
+  prevArmPos[1] = 0;
+  prevArmPos[2] = 0;
+  prevArmPos[3] = 0;
+  prevArmPos[4] = 0;
+  prevArmPos[5] = 0;
+  prevArmPos[6] = 0;
+  */
 }
 
 void enableMotors(){
-	dirState = 0xFF;
-	direction.digitalWrite(dirState);
+  
 }
 
 void disableMotors(){
-	dirState = 0xFD;
-	direction.digitalWrite(dirState);
+
 }
 
-void driveMotor (int mot , int dir , int rawSpeed){
-	double driveSpeed = map(rawSpeed , 0 , 100 , 0 , 4096);
-
-
-	switch(mot) {
-		case 1:
-			//b5 (15) , b6 (14) , pwmb56 (5)
-			if(dir == 1) {
-				dirState |= _BV(13);
-				dirState &= ~(_BV(12));
-			} else if (dir == 0) {
-				dirState &= ~(_BV(13));
-				dirState |= (_BV(12));
-			}
-			pwm.setPin(5, driveSpeed, false);
-		break;
-		case 2:
-			//a6 (12) , a5 (13) , pwma56 (4)
-			if(dir == 1) {
-				dirState |= _BV(10);
-				dirState &= ~(_BV(11));
-			} else if (dir == 0) {
-				dirState &= ~(_BV(12));
-				dirState |= (_BV(11));
-			}
-			pwm.setPin(4, driveSpeed, false);
-		break;
-		case 3:
-			//b3 (11) , b4 (10) , pwmb34 (3)
-			if(dir == 1) {
-				dirState |= _BV(9);
-				dirState &= ~(_BV(8));
-			} else if (dir == 0) {
-				dirState &= ~(_BV(9));
-				dirState |= (_BV(8));
-			}
-			pwm.setPin(3, driveSpeed, false);			
-		break;
-		case 4:
-			//a3 (7) , a4 (6) , pwma34 (2)
-			if(dir == 1) {
-				dirState |= _BV(7);
-				dirState &= ~(_BV(6));
-			} else if (dir == 0) {
-				dirState &= ~(_BV(7));
-				dirState |= (_BV(6));
-			}
-			pwm.setPin(2, driveSpeed, false);
-		break;
-		case 5:
-			//b1 (4) , b2 (5) , pwmb12 (1)
-			if(dir == 1) {
-				dirState |= _BV(4);
-				dirState &= ~(_BV(5));
-			} else if (dir == 0) {
-				dirState &= ~(_BV(4));
-				dirState |= (_BV(5));
-			}
-			pwm.setPin(1, driveSpeed, false);
-		break;
-		case 6:
-			//a1 (2) , a2 (3) , pwma12 (0)
-			if(dir == 1) {
-				dirState |= _BV(2);
-				dirState &= ~(_BV(3));
-			} else if (dir == 0) {
-				dirState &= ~(_BV(2));
-				dirState |= (_BV(3));
-			}
-			pwm.setPin(0, driveSpeed, false);
-		break;
-		case 7:
-			//a7 (17) , a8 (16) , pwma7 (6)
-			if(dir == 1) {
-				dirState |= _BV(15);
-				dirState &= ~(_BV(14));
-			} else if (dir == 0) {
-				dirState &= ~(_BV(15));
-				dirState |= (_BV(14));
-			}
-			pwm.setPin(6, driveSpeed, false);
-		break;
-		default:
-		
-		break;
-	}
-       direction.digitalWrite(dirState);
+void driveMotor (Servo mot , int dir , int rawSpeed){
+  if (dir > 0) {
+    Serial.println("a");
+    mot.writeMicroseconds(1600);
+  } else if (dir < 0) {
+    Serial.println("b");
+    mot.writeMicroseconds(1400);
+  } else {
+    Serial.println("c");
+    mot.writeMicroseconds(1500);
+  }
+  Serial.println(rawSpeed);
 }
 
 
-void stopMotor (int mot) {
-	driveMotor (mot , 0 , 0);
+void stopMotor(Servo mot) {
+  driveMotor(mot , 0 , 0);
 }
 
 int absolute(int input) {
@@ -144,76 +70,90 @@ int absolute(int input) {
 }
 
 // calculates the arm pos and writes to the motors
-void calculateArmPos() {
+void calculateArmPos(int8_t packetBuffer[]) {
+  Serial.println("calculate");
   // parse the packet into the array
   
-  int16_t nextArmPos[7];
+  // int16_t nextArmPos[7];
+  // unpack the packet here 
+  /*
   for (int i = 0; i < 7; i++) {
+    /*
     nextArmPos[i] = packetBuffer[ARM_PACK_START + 2 * i];
     nextArmPos[i] *= 256;
     nextArmPos[i] += packetBuffer[ARM_PACK_START + 2 * i + 1];
+    
   }
-
+*/
   // if the potentiometers gets done prevArmPos will be chnaged here
   
   // calculate the difference and write to motors
-  
+  /*
   int16_t diffArmPos[7];
   for (int k = 0; k < 7; k++) {
     diffArmPos[k] = prevArmPos[k] - nextArmPos[k];
   }
-  
+  */
   
   // write to motors
   // sholder_rot
-  if (diffArmPos[SHOLDER_ROT] < 0) {
-    driveMotor(SHOLDER_ROT, 1, absolute(diffArmPos[SHOLDER_ROT]));
+  if (packetBuffer[0] < 0) {
+    driveMotor(sholder_rot, 1, absolute(packetBuffer[0]));
   } else {
-    driveMotor(SHOLDER_ROT, 0, absolute(diffArmPos[SHOLDER_ROT]));
+    driveMotor(sholder_rot, -1, absolute(packetBuffer[0]));
   }
   
   // sholder
-  if (diffArmPos[SHOLDER] < 0) {
-    driveMotor(SHOLDER, 1, absolute(diffArmPos[SHOLDER]));
+  if (packetBuffer[1] < 0) {
+    driveMotor(sholder, 1, absolute(packetBuffer[1]));
   } else {
-    driveMotor(SHOLDER, 0, absolute(diffArmPos[SHOLDER]));
+    driveMotor(sholder, -1, absolute(packetBuffer[1]));
   }
   // elbow
-  if (diffArmPos[ELBOW] < 0) {
-    driveMotor(ELBOW, 1, absolute(diffArmPos[ELBOW]));
+  if (packetBuffer[2] < 0) {
+    driveMotor(elbow, 1, absolute(packetBuffer[2]));
   } else {
-    driveMotor(ELBOW, 0, absolute(diffArmPos[ELBOW]));
+    driveMotor(elbow, -1, absolute(packetBuffer[2]));
   }
   
   // elbow_rot
-  if (diffArmPos[ELBOW_ROT] < 0) {
-    driveMotor(ELBOW_ROT, 1, absolute(diffArmPos[ELBOW_ROT]));
+  if (packetBuffer[3] < 0) {
+    driveMotor(elbow_rot, 1, absolute(packetBuffer[3]));
   } else {
-    driveMotor(ELBOW_ROT, 0, absolute(diffArmPos[ELBOW_ROT]));
+    driveMotor(elbow_rot, -1, absolute(packetBuffer[3]));
   }
 
   // wrist
-  if (diffArmPos[WRIST] < 0) {
-    driveMotor(WRIST, 1, absolute(diffArmPos[WRIST]));
+  if (packetBuffer[4] < 0) {
+    driveMotor(wrist, 1, absolute(packetBuffer[4]));
   } else {
-    driveMotor(WRIST, 0, absolute(diffArmPos[WRIST]));
+    driveMotor(wrist, -1, absolute(packetBuffer[4]));
   }
   // wrist_rot
-  if (diffArmPos[WRIST_ROT] < 0) {
-    driveMotor(WRIST_ROT, 1, absolute(diffArmPos[WRIST_ROT]));
+  if (packetBuffer[5] < 0) {
+    driveMotor(wrist_rot, 1, absolute(packetBuffer[5]));
   } else {
-    driveMotor(WRIST_ROT, 0, absolute(diffArmPos[WRIST_ROT]));
+    driveMotor(wrist_rot, -1, absolute(packetBuffer[5]));
   }
   // hand
-  if (diffArmPos[HAND] < 0) {
-    driveMotor(HAND, 1, absolute(diffArmPos[HAND]));
+  if (packetBuffer[6] < 0) {
+    driveMotor(hand, 1, absolute(packetBuffer[6]));
   } else {
-    driveMotor(HAND, 0, absolute(diffArmPos[HAND]));
+    driveMotor(hand, -1, absolute(packetBuffer[6]));
   }
+  /*
   
   // replace prev with next
   for (int j = 0; j < 7; j++) {
     prevArmPos[j] = nextArmPos[j];
   }
-  
+  */
+}
+
+int abosulte(int in) {
+   if (in > 0) {
+     return in;
+   } else {
+     return -in;
+   }
 }

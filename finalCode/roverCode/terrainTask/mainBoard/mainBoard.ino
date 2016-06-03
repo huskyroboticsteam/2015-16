@@ -1,4 +1,4 @@
-#include "Arduino.h"
+ #include "Arduino.h"
 #include "config.h"
 #include <Ethernet.h>
 #include <EthernetUdp.h>
@@ -30,6 +30,7 @@ void setup()
     initializeWirelessCommunication();
     initializeSteeringSystem();
     initializeNavigation();
+    cameraSetup();
 }
 
 void loop()
@@ -46,5 +47,6 @@ void loop()
         }
         writeToMotors();
     }
+    moveCameras();
     timeoutCheck();
 }

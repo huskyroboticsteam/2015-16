@@ -3,6 +3,11 @@
 #include "config.h"
 #include <Ethernet.h>
 #include <EthernetUdp.h>
+
+#define RIGHT_PET 110
+
+#define LEFT_PET 143
+
     
 void calculateMotorSpeeds()
 {
@@ -10,29 +15,40 @@ void calculateMotorSpeeds()
     inputAngle *= 0.5; // Makes the linear turning slower.
     
     speed = map(((unsigned char)packetBuffer[3]) & 0xFFFF, 0, 255, 100, -100);
-    speed /= 2.5;
+    speed /= 5;
     // Min is 284 (all the way right), max is 769 (all the way left), middle is 531 (center)
 
     // left is positive and right is negative for inputAngle
-    if(currentAngle >= 750) { // state 1 - going left
+    if(currentAngle >= LEFT_PET - 10) { // state 1 - going left
         if(inputAngle > 8) { // doesn't want to keep turning left
             frontRightVal = speed;
             frontLeftVal = speed; 
             backRightVal = speed;
             backLeftVal = speed;
-        } else { // turning the other way (right)
+        }/* else if (inputAngle > -8) { // going straight
+          frontRightVal = speed;
+          frontLeftVal = speed;
+          backRightVal = speed + 10;
+          backLeftVal = speed - 10;
+        } */else { // turning the other way (right)
+        
             frontRightVal = (speed + inputAngle);
             frontLeftVal = (speed - inputAngle); 
             backRightVal = (speed - inputAngle);
             backLeftVal = (speed + inputAngle);
         }
-    } else if (currentAngle <= 300) { // state 3 - going right
+    } else if (currentAngle <= RIGHT_PET + 10) { // state 3 - going right
         if(inputAngle < -8) { // doesn't want to keep turning right
             frontRightVal = speed;
             frontLeftVal = speed; 
             backRightVal = speed;
             backLeftVal = speed;
-        } else { // turning the other way (left)
+        } /*else if (inputAngle < 8) { // going straight
+          frontRightVal = speed;
+          frontLeftVal = speed;
+          backRightVal = speed - 10;
+          backLeftVal = speed + 10;
+        } */else { // turning the other way (left)
             frontRightVal = (speed + inputAngle);
             frontLeftVal = (speed - inputAngle); 
             backRightVal = (speed - inputAngle);

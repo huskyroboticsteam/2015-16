@@ -1,114 +1,70 @@
- #include "arm_control.h"
-#include <Adafruit_PWMServoDriver.h>
-#include <I2cDiscreteIoExpander.h>
-#define ARM_PACK_START 4
-#define SHOLDER_ROT 0
-#define SHOLDER 1
-#define ELBOW 2
-#define ELBOW_ROT 3
-#define WRIST 4
-#define WRIST_ROT 5
-#define HAND 6
+#include "Arduino.h"
+#include <Servo.h>
+#include <Ethernet.h>
+#include <EthernetUdp.h>
 
-#define SPEED_SCALAR 
-int16_t prevArmPos[7];
-char packetBuffer[18];
-char packetVal = 0;
+#include <Wire.h>
 
-void initArm();
-void enableMotors();
-void calculateArmPos();
+EthernetUDP Udp;
+byte MAC_ADDRESS[] = {0x90, 0xA2, 0xDA, 0x0D, 0x89, 0x99};
+IPAddress IP(192, 168, 1, 7);
+bool networkStatus = true;
+bool hasIP = false;
+unsigned long timeLastPacket;
+
+
+Servo sholder_rot; 
+Servo sholder; 
+Servo elbow; 
+Servo elbow_rot; 
+Servo wrist; 
+Servo wrist_rot; 
+Servo hand; 
+
+char packetBuffer[7];
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  //Serial.println("1");
-  delay(100);
-  //Serial.println("2");
+  Serial.begin(115200);
   initArm();
-  //Serial.println("3");
-  delay(100);
-  //Serial.println("4");
-  enableMotors();
-  //Serial.println("5");
-  delay(100);
-  //Serial.println("6");
+  Wire.begin(8);                // join i2c bus with address #8
+  Wire.onReceive(receiveEvent); // register event
+   initializeWirelessCommunication();
   
-  
-  prevArmPos[0] = 0;
-  prevArmPos[1] = 0;
-  prevArmPos[2] = 0;
-  prevArmPos[3] = 0;
-  prevArmPos[4] = 0;
-  prevArmPos[5] = 0;
-  prevArmPos[6] = 0;
+  // initializeArmTest();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  receiveWirelessData();
   // calculateArmPos();
-  /*
-  packetBuffer[4] = packetVal;
-  packetBuffer[5] = packetVal;
-  packetBuffer[6] = packetVal;
-  packetBuffer[7] = packetVal;
-  packetBuffer[8] = packetVal;
-  packetBuffer[9] = packetVal;
-  packetBuffer[10] = packetVal;
-  packetBuffer[11] = packetVal;
-  packetBuffer[12] = packetVal;
-  packetBuffer[13] = packetVal;
-  packetBuffer[14] = packetVal;
-  packetBuffer[15] = packetVal;
-  packetBuffer[16] = packetVal;
-  packetBuffer[17] = packetVal;
-  packetBuffer[18] = packetVal;
-  if (packetVal > 50) {
-    packetVal = -50;
-  }
-  packetVal++;
-  */
-  
-  driveMotor(7, 1, 10);
-  driveMotor(1, 1, 10);
-  driveMotor(2, 1, 10);
-  driveMotor(3, 1, 10);
-  driveMotor(4, 1, 10);
-  driveMotor(5, 1, 10);
-  driveMotor(6, 1, 10);
-        
-  delay(1000);
-  stopMotor(1);
-  stopMotor(2);
-  stopMotor(3);
-  stopMotor(4);
-  stopMotor(5);
-  stopMotor(6);
-  stopMotor(7);
 
-  delay(1000);
-  driveMotor(7, 0, 20);
-  driveMotor(1, 0, 20);
-  driveMotor(2, 0, 20);
-  driveMotor(3, 0, 20);
-  driveMotor(4, 0, 20);
-  driveMotor(5, 0, 20);
-  driveMotor(6, 0, 20);
-        
-  delay(1000);
-  stopMotor(1);
-  stopMotor(2);
-  stopMotor(3);
-  stopMotor(4);
-  stopMotor(5);
-  stopMotor(6);
-  stopMotor(7);
-        
-  delay(1000);
+  // calculateArmTest();
+}
+
+
+
+// function that executes whenever data is received from master
+// this function is registered as an event, see setup()
+void receiveEvent(int howMany) {
   
-  /*
-  driveMotor(2, 0, 20);
-  delay(1000);
-  */
-  
+  int8_t data[11];
+  int i = 0;
+  while (0 < Wire.available()) { // loop through all but the last
+    int8_t c = Wire.read(); // receive byte as a character
+    c -= 127;
+    data[i] = c;
+  }
+  int8_t data_Arm[7];
+  for (int j = 4; j < 11; j++) {
+    data_Arm[j - 4] = data[j];
+  }
+  calculateArmPos(data_Arm);
+/*
+  while (1 < Wire.available()) { // loop through all but the last
+    char c = Wire.read(); // receive byte as a character
+    Serial.print(c);
+  }
+  char x = Wire.read();
+  Serial.println(x);
+*/
 }
