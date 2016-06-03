@@ -18,7 +18,8 @@ int drillgo = 128;
 int therm_DO = 5;
 int therm_CS = 4;
 int therm_CLK = 3;
-int maxW = 1024; //this value will need to change
+int maxW = 1024;
+int minW = 250;
 
 Adafruit_MAX31855 thermocouple(therm_CLK, therm_CS, therm_DO);
 
@@ -29,6 +30,7 @@ void setup()
 {
     initializeScience();
     initializeWirelessCommunication();
+    pinMode(LED, OUTPUT);
     Serial.begin(9600);
 }
 
@@ -36,10 +38,11 @@ void loop()
 {
     receiveWirelessData();
     calculateScienceSpeeds();
-    temp();
-    soil();
+    ledOn();
     writeToAugar();
+    temp();
     collect();
+    soil();
     timeoutCheck();
 }
 

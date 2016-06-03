@@ -11,6 +11,7 @@
 #define MOTOR_5    9// augar
 #define MOTOR_6    6 // drill
 #define SOIL_SENSOR A0 //humidity sensor
+#define LED 13 //Whatever pin the LED is connected to
 
 // ETHERNET COMMUNICATION CONSTANTS //
 #define UDP_PORT         8888

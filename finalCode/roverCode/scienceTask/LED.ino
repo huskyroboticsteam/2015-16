@@ -1,4 +1,4 @@
-#include "Arduino.h"
+/*#include "Arduino.h"
 #include "config.h"
 #include <Ethernet.h>
 #include <EthernetUdp.h>
@@ -14,9 +14,9 @@ void setup() {
     Ethernet.begin(MAC_ADDRESS, IP);
     Udp.begin(UDP_PORT);
     Serial.begin(9600);
-}
+}*/
 
-void loop() {
+void ledOn() {
     if (Serial.available() > 0) {
         int byteInfo = Serial.read();
         if (byteInfo == 1) {

@@ -16,6 +16,14 @@ void temp() {
     Serial.println(C);
     Serial.print("F: ");
     Serial.println(F);
-    delay(1000);
+    //delay(1000);
 }
 
+void soil() {
+  float rawValue = analogRead(SOIL_SENSOR);
+  Serial.println(rawValue);
+  float humidity = ((maxW - rawValue) * 100/ (maxW - minW));
+  Serial.print("Humidity: ");
+  Serial.println(humidity);
+  //delay(1000);
+}
