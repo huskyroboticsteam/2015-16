@@ -15,11 +15,11 @@ void calculateMotorSpeeds()
     inputAngle *= 0.5; // Makes the linear turning slower.
     
     speed = map(((unsigned char)packetBuffer[3]) & 0xFFFF, 0, 255, 100, -100);
-    speed /= 5;
+    speed /= 2.5;
     // Min is 284 (all the way right), max is 769 (all the way left), middle is 531 (center)
 
     // left is positive and right is negative for inputAngle
-    if(currentAngle >= LEFT_PET - 10) { // state 1 - going left
+    if(currentAngle >= 750) { // state 1 - going left
         if(inputAngle > 8) { // doesn't want to keep turning left
             frontRightVal = speed;
             frontLeftVal = speed; 
@@ -37,7 +37,7 @@ void calculateMotorSpeeds()
             backRightVal = (speed - inputAngle);
             backLeftVal = (speed + inputAngle);
         }
-    } else if (currentAngle <= RIGHT_PET + 10) { // state 3 - going right
+    } else if (currentAngle <= 300) { // state 3 - going right
         if(inputAngle < -8) { // doesn't want to keep turning right
             frontRightVal = speed;
             frontLeftVal = speed; 
@@ -80,9 +80,9 @@ void writeToMotors()
 {
     if(networkStatus == true) {
         timeLastPacket = millis();
-        frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 2000, 1000));
+        frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 1000, 2000));
         frontLeft.writeMicroseconds(map(frontLeftVal, -100, 100, 2000, 1000));
-        backRight.writeMicroseconds(map(backRightVal, -100, 100, 1000, 2000));
+        backRight.writeMicroseconds(map(backRightVal, -100, 100, 2000, 1000));
         backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 2000, 1000));
     }
 }

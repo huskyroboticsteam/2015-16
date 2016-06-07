@@ -10,12 +10,23 @@
 //#define MOTOR_4    11 // BACK_RIGHT
 #define MOTOR_5    9// augar
 #define MOTOR_6    6 // drill
-#define SOIL_SENSOR A0 //humidity sensor
-#define LED 13 //Whatever pin the LED is connected to
+#define TURNTABLE 7
+#define SOIL_SENSOR1 A0 //humidity sensor
+#define SOIL_SENSOR2 A1 //humidity sensor
+
+#define HUM_RED 2
+#define HUM_GREEN 3
+#define HUM_BLUE 4
+#define TEMP_RED 5
+#define TEMP_GREEN A2 
+#define TEMP_BLUE A3
+
+#define THERM_PIN 8
+
 
 // ETHERNET COMMUNICATION CONSTANTS //
-#define UDP_PORT         8888
-#define DESTINATION_PORT 8888
+#define UDP_PORT         7777
+#define DESTINATION_PORT 7777
 #define TIMEOUT          1000
 
 // SERIAL COMMUNICATION CONSTANTS //

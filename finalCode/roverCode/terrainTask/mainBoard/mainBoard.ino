@@ -3,6 +3,7 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #include <Servo.h>
+#include <Adafruit_PWMServoDriver.h>
 
 EthernetUDP Udp;
 byte MAC_ADDRESS[] = {0x90, 0xA2, 0xDA, 0x00, 0x3D, 0x8B};
@@ -25,28 +26,45 @@ int frontLeftVal = 0;
 int backRightVal = 0;
 int backLeftVal = 0;
 
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x43);
+
+Servo eye_of_sauron;
+
 void setup()
 {
-    initializeWirelessCommunication();
+  //Serial.begin(115200);
+    initializePWM();
+    initializeArm();
     initializeSteeringSystem();
-    initializeNavigation();
+    // initializeNavigation();
     cameraSetup();
+    initializeWirelessCommunication();
+    
 }
 
 void loop()
 {
    receiveWirelessData();
-   getNavigationData();
-   if ((unsigned char)packetBuffer[1] == 1) { // is emergency stop enabled?
-        if ((unsigned char)packetBuffer[0] == 1) { // is potentiometer enabled?
-            readCurrentAngle();
-            calculateMotorSpeeds();
-        }
-        else {
-            emergencyCalculateSpeeds();
-        }
-        writeToMotors();
-    }
-    moveCameras();
-    timeoutCheck();
+   if (!timeoutCheck()) {
+   //getNavigationData();
+     if ((unsigned char)packetBuffer[1] == 1) { // is emergency stop enabled?
+          if ((unsigned char)packetBuffer[0] == 1) { // is potentiometer enabled?
+              readCurrentAngle();
+              calculateMotorSpeeds();
+          }
+          else {
+              emergencyCalculateSpeeds();
+          }
+          writeToMotors();
+      }
+      makeArmMove();
+      moveCameras();
+   }
 }
+
+void initializePWM() {
+  pwm.begin();
+  pwm.setPWMFreq(333);
+  yield();
+}
+

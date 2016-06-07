@@ -10,20 +10,29 @@ void setup() {
     Serial.begin(9600);
 }*/
 void temp() {
-    float F = thermocouple.readFarenheit();
-    float C = thermocouple.readCelsius();
-    Serial.print("C: ");
+    F = thermocouple.readFarenheit();
+    C = thermocouple.readCelsius();
+    /*Serial.print("C: ");
     Serial.println(C);
     Serial.print("F: ");
     Serial.println(F);
+    */
     //delay(1000);
 }
 
 void soil() {
-  float rawValue = analogRead(SOIL_SENSOR);
-  Serial.println(rawValue);
-  float humidity = ((maxW - rawValue) * 100/ (maxW - minW));
+  float rawValue;
+  if ((int)packetBuffer[2] == 1) {
+    rawValue = analogRead(SOIL_SENSOR1);
+  } else if ((int)packetBuffer[2] == 2) {
+    rawValue = analogRead(SOIL_SENSOR2);
+  } else {
+    humidity = 0;
+  }
+  humidity = ((maxW - rawValue) * 100/ (maxW - minW));
+  /*
   Serial.print("Humidity: ");
   Serial.println(humidity);
+  */
   //delay(1000);
 }

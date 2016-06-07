@@ -16,13 +16,3 @@ void setup() {
     Serial.begin(9600);
 }*/
 
-void ledOn() {
-    if (Serial.available() > 0) {
-        int byteInfo = Serial.read();
-        if (byteInfo == 1) {
-            digitalWrite(LED, HIGH);
-        } else {
-            digitalWrite(LED, LOW);
-        }
-    }
-}
