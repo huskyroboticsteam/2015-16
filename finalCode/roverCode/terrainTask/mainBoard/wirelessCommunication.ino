@@ -25,21 +25,32 @@ void receiveWirelessData()
 bool parsePacketData()
 {
     int packetSize = Udp.parsePacket();
-    if(packetSize == 4) {
+    if(packetSize == 13) {
+        //Serial.println(13);
         hasIP = true;
         Udp.read(packetBuffer, 96);
+        timeLastPacket = millis();
         return true;
     }
     return false;
 }
 
-void timeoutCheck()
+bool timeoutCheck()
 {
     if(millis() - timeLastPacket >= TIMEOUT) {
         frontRight.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
         frontLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
         backRight.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
         backLeft.writeMicroseconds(TALON_NEUTRAL_FREQUENCY);
+        pwm.setPWM(SHOLDER_ROT, 0, ARM_TALON_NEUTRAL_FREQUENCY);
+        pwm.setPWM(SHOLDER, 0, ARM_TALON_NEUTRAL_FREQUENCY);
+        pwm.setPWM(ELBOW, 0, ARM_TALON_NEUTRAL_FREQUENCY - 10);
+        pwm.setPWM(ELBOW_ROT, 0, ARM_TALON_NEUTRAL_FREQUENCY - 10);
+        pwm.setPWM(WRIST, 0, ARM_TALON_NEUTRAL_FREQUENCY);
+        pwm.setPWM(WRIST_ROT, 0, ARM_TALON_NEUTRAL_FREQUENCY);
+        pwm.setPWM(HAND, 0, ARM_TALON_NEUTRAL_FREQUENCY);
+        return true;
     }
+    return false;
 }
 

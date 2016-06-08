@@ -226,20 +226,20 @@ while not done:
             # this is the arm stuff
             #there are some changes here
             sholder_joy = arm_joy2value(joystick[i].get_axis(1))
-            sholder_rot_joy = arm_joy2value(joystick[i].get_axis(0))
+            sholder_rot_joy = arm_joy2value(joystick[i].get_axis(3))
             elbow_joy = 0
-            if joystick[i].get_button(0):
+            if joystick[i].get_button(2):
                 elbow_joy = 1
-            elif joystick[i].get_button(1):
+            elif joystick[i].get_button(4):
                 elbow_joy = -1
-            elbow_rot_joy =  arm_joy2value(joystick[i].get_axis(3))
+            elbow_rot_joy =  arm_joy2value(joystick[i].get_axis(0))
             hat_vals = joystick[i].get_hat(0)
             wrist_joy = hat_vals[1]
             wrist_rot_joy = hat_vals[0]
             claw_pinch = 0
-            if joystick[i].get_button(3):
+            if joystick[i].get_button(0):
                 claw_pinch = 1
-            elif joystick[i].get_button(2):
+            elif joystick[i].get_button(1):
                 claw_pinch = -1
             arm_speed = 1 - joy2value(joystick[i].get_axis(2), False)
 

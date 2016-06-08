@@ -3,6 +3,11 @@
 #include "config.h"
 #include <Ethernet.h>
 #include <EthernetUdp.h>
+
+#define RIGHT_PET 110
+
+#define LEFT_PET 143
+
     
 void calculateMotorSpeeds()
 {
@@ -20,7 +25,13 @@ void calculateMotorSpeeds()
             frontLeftVal = speed; 
             backRightVal = speed;
             backLeftVal = speed;
-        } else { // turning the other way (right)
+        }/* else if (inputAngle > -8) { // going straight
+          frontRightVal = speed;
+          frontLeftVal = speed;
+          backRightVal = speed + 10;
+          backLeftVal = speed - 10;
+        } */else { // turning the other way (right)
+        
             frontRightVal = (speed + inputAngle);
             frontLeftVal = (speed - inputAngle); 
             backRightVal = (speed - inputAngle);
@@ -32,7 +43,12 @@ void calculateMotorSpeeds()
             frontLeftVal = speed; 
             backRightVal = speed;
             backLeftVal = speed;
-        } else { // turning the other way (left)
+        } /*else if (inputAngle < 8) { // going straight
+          frontRightVal = speed;
+          frontLeftVal = speed;
+          backRightVal = speed - 10;
+          backLeftVal = speed + 10;
+        } */else { // turning the other way (left)
             frontRightVal = (speed + inputAngle);
             frontLeftVal = (speed - inputAngle); 
             backRightVal = (speed - inputAngle);
@@ -64,9 +80,9 @@ void writeToMotors()
 {
     if(networkStatus == true) {
         timeLastPacket = millis();
-        frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 2000, 1000));
+        frontRight.writeMicroseconds(map(frontRightVal, -100, 100, 1000, 2000));
         frontLeft.writeMicroseconds(map(frontLeftVal, -100, 100, 2000, 1000));
-        backRight.writeMicroseconds(map(backRightVal, -100, 100, 1000, 2000));
+        backRight.writeMicroseconds(map(backRightVal, -100, 100, 2000, 1000));
         backLeft.writeMicroseconds(map(backLeftVal, -100, 100, 2000, 1000));
     }
 }

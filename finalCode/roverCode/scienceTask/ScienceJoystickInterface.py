@@ -213,26 +213,30 @@ while not done:
             speed = 128
             angle = 128
             augar = 128
-            if joystick[i].get_button(12) == False :
+            #####################################################
+            #####################################################
+            if joystick[i].get_button(11) == True :
+                augar = (joy2value(-joystick[i].get_axis(1), True))
+                augar = float256(augar, -1, 1)
+                print("AUGAR: " + str(ord(chr(augar))))
+                if joystick[i].get_button(0) == True:
+                    drill_rotate = 1
+                    # drillgo = 1
+                    print("clock is working!")
+                elif joystick[i].get_button(1) == True:
+                    antidrill_rotate = 1
+                    # drillgo = 1
+                    print("anticlock is working!")
+            ######################################################
+            ######################################################
+            else :
                 angle = (joy2value(joystick[i].get_axis(0), True))
-                speed = (joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
+                speed = (-joy2value(joystick[i].get_axis(1), (not joystick[i].get_button(0))))
                 angle = float256(angle, -1, 1)
                 speed = float256(speed, -1, 1)
                 print("ANGLE: " + str(ord(chr(angle))))
                 print("SPEED: " + str(ord(chr(speed))))
                 # send a 1 if potentiometer is in use (red), 0 if we need to shut off (black)
-            else :
-                augar = (joy2value(joystick[i].get_axis(1), True))
-                augar = float256(augar, -1, 1)
-                print("AUGAR: " + str(ord(chr(augar))))
-                if joystick[i].get_button(0) == True:
-                    drill_rotate = 1
-                    #drillgo = 1
-                    print("clock is working!")
-                elif joystick[i].get_button(1) == True:
-                    antidrill_rotate = 1
-                    #drillgo = 1
-                    print("anticlock is working!")
 
             pot_flag = 1
             if POTCOLOR == BLACK:

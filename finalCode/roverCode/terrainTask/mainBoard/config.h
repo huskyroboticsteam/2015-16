@@ -1,9 +1,28 @@
 // MOTOR CONTROL CONSTANTS //
 #define TALON_NEUTRAL_FREQUENCY 1500
+
 #define MOTOR_1    3 // BACK_RIGHT
 #define MOTOR_2    5 // FRONT_RIGHT
 #define MOTOR_3    6 // FRONT_LEFT
 #define MOTOR_4    9 // BACK_LEFT
+
+// ARM CONTROL CONSTANTS //
+#define ARM_TALON_NEUTRAL_FREQUENCY 2000
+
+#define SHOLDER_ROT 0
+#define SHOLDER 1
+#define ELBOW 2
+#define ELBOW_ROT 3
+#define WRIST 4
+#define WRIST_ROT 5
+#define HAND 6
+
+#define ARM_SPEED 200
+
+// CAMERAS //
+
+#define EYE_OF_SAURON 10
+
 
 // ETHERNET COMMUNICATION CONSTANTS //
 #define UDP_PORT         8888
