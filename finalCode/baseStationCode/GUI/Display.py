@@ -69,6 +69,7 @@ class DisplayInterface(DisplayScreen):
         # Create other objects
         self.SidebarRect = Sidebar(self.pygame,self.screenHeight)
         self.MarkerTextArea = TextArea((25, 400, 150, 100))
+        self.CameraSelectionArea = CameraArea()
         self.createButtons()
         self.InputTextbox = Textbox()
         self.RoverPositionMarker = RoverPosition(self.RoverBall)
@@ -144,6 +145,9 @@ class DisplayInterface(DisplayScreen):
         # Display the box list of points
         self.MarkerTextArea.display(self.screen)
 
+        # Display camera indicators
+        self.CameraSelectionArea.display(self.screen)
+
         # Display the scale indicator
         self.ScaleIndicatorLine.display(self.screen,self.ScaleIndicatorImage)
 
@@ -181,8 +185,12 @@ class DisplayInterface(DisplayScreen):
         if MagnetometerNumber < 0:
             MagnetometerNumber = MagnetometerNumber + 360
         print MagnetometerNumber
-        MagneticCorrection = -15.93333 # -15.93333 in Seattle, -10.81 in Hanksville
+        MagneticCorrection = -10.81 # -15.93333 in Seattle, -10.81 in Hanksville
         self.RoverPositionMarker.rotateImage(self.pygame,-MagnetometerNumber+MagneticCorrection)
+
+    def givePotentiometer(self,info):
+        angle = 76*info/33-874/3
+        self.RoverGraphic.rotateImage(angle)
 
     def displaymap(self,object,location):
         self.screen.blit(object, (self.MainAxis.x + location[0], self.MainAxis.y + location[1]))

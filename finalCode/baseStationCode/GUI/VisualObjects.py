@@ -212,7 +212,7 @@ class RoverGraphic:
     def display(self, screen):
         screen.blit(self.angularImage1, (self.X-(self.angImgCenter[0]-self.imgCenter[0]),self.Y-(self.angImgCenter[1]-self.imgCenter[1])))
         screen.blit(self.angularImage2, (self.X-(self.angImgCenter[0]-self.imgCenter[0]),self.Y-(self.angImgCenter[1]-self.imgCenter[1])))
-    def rotateImage(self, pygame, angle):
+    def rotateImage(self, angle):
         self.angle = angle
         if angle != 0:
             self.angularImage1 = pygame.transform.rotozoom(self.image1, angle, 1)
@@ -235,3 +235,29 @@ class RoverPosition:
         if angle != 0:
             self.angularImage = pygame.transform.rotozoom(self.image, angle, 1)
         self.angImgCenter = self.angularImage.get_rect().center
+
+class CameraArea:
+    def __init__(self):
+        self.X = 25
+        self.Y = 650
+        self.Cameras = [Camera("Eye of Sauran", self.X, self.Y, 0),Camera("O Shit", self.X, self.Y, 1),Camera("Arm", self.X, self.Y, 2),Camera("Tom", self.X, self.Y, 3)]
+    def display(self, screen):
+        for i in range(len(self.Cameras)):
+            self.Cameras[i].display(screen)
+    def switch(self,id):
+        self.Cameras[id].switch()
+
+class Camera:
+    def __init__(self,name,X,Y,id):
+        self.Name = name
+        self.Color = colors.HIGHLIGHTBOXGREEN
+        self.Status = True
+        self.Rectangle = (X+30*id,Y,20,20)
+    def display(self, screen):
+        pygame.draw.rect(screen, self.Color, self.Rectangle)
+    def switch(self):
+        self.Status = not self.Status
+        if self.Status == True:
+            self.Color = colors.HIGHLIGHTBOXGREEN
+        else:
+            self.Color = colors.HIGHLIGHTBOXRED

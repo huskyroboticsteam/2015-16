@@ -57,6 +57,11 @@ class receiveOverUDP(threading.Thread):
                     self.Magnetometer = dataArray[0]
                     self.Potentiometer = dataArray[1] # 2 or 3?
 
+                elif self.addr[0] == '192.168.1.7':
+                    print data
+                    print "first byte: " + str(int(data[0]))
+                    print "second byte: " + str(int(data[1]))
+
             # print data
             #
             # dataArray = data.split(',')

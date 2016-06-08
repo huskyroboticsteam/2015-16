@@ -12,3 +12,4 @@ class sendOverUDP:
     def sendItOff(self, messageUDP):
         #print str(messageUDP)
         self.sockBalls.sendto(messageUDP, (self.TargetIP, self.UDPPort))
+        print messageUDP + " " + self.TargetIP
